@@ -3,17 +3,21 @@
 
 #include "CustomTimeline.h"
 #include "Engine.h"
+#include "Containers/UnrealString.h"
 
 
 
-
-
-UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObject, float playRate,float& outputValue,UCustomTimeline*& ref)
+UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObject, float playRate,float& outputValue,float& realDeltaTime,UCustomTimeline*& ref)
 {
 	UCustomTimeline* newTimeline = NewObject<UCustomTimeline>();
+	newTimeline->TickDelegate = FTickerDelegate::CreateUObject(newTimeline, &UCustomTimeline::Tick);
+	newTimeline->TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(newTimeline->TickDelegate);
+	newTimeline->WorldContextObject = worldContextObject;
 	newTimeline->World = GEngine->GetWorldFromContextObjectChecked(worldContextObject);
 	newTimeline->timerDuration = 1 / playRate;
 	outputValue= 0;
+	realDeltaTime = 0;
+	newTimeline->realDeltaTime = &realDeltaTime;
 	newTimeline->value = &outputValue;
 	newTimeline->running = true;
 	ref = newTimeline;
@@ -22,14 +26,18 @@ UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObjec
 
 void UCustomTimeline::StopCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("REMOVED timeline"), *ref->GetName());
+	FTicker::GetCoreTicker().RemoveTicker(ref->TickDelegateHandle);
 	ref->running = false;
 	ref->Finished.Broadcast();
-	ref = nullptr;
 }
 
-void UCustomTimeline::Tick(float DeltaTime)
+bool UCustomTimeline::Tick(float DeltaTime)
 {
-	if (!running) { return; }
+	//UE_LOG(LogTemp, Log, TEXT("custom timeline : %s"),*GetName());
+	if (!running) { return false; }
+
+	*realDeltaTime = DeltaTime;
 
 	*value += DeltaTime/timerDuration;
 
@@ -37,12 +45,8 @@ void UCustomTimeline::Tick(float DeltaTime)
 		Update.Broadcast();
 	}
 	else {
-		running = false;
-		Finished.Broadcast();
+		StopCustomTimeline(WorldContextObject, this);
 	}
+	return true;
 }
 
-TStatId UCustomTimeline::GetStatId() const
-{
-	return TStatId();
-}

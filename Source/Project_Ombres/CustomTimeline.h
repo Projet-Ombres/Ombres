@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Curves/CurveFloat.h"
-#include "Tickable.h"
+#include "Containers/Ticker.h"
 
 #include "CustomTimeline.generated.h"
 
@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOutputPin);
  * 
  */
 UCLASS(BlueprintType)
-class PROJECT_OMBRES_API UCustomTimeline : public UBlueprintAsyncActionBase,public FTickableGameObject
+class PROJECT_OMBRES_API UCustomTimeline : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 public:
@@ -37,7 +37,7 @@ public:
 	@return Ref - The reference of this timeline.
 	*/
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Start custom timeline", CompactNodeTitle="StartCustomTimeline",Keywords="Start Custom Timeline", HidePin = "worldContextObject", DefaultToSelf = "worldContextObject" ), Category = "Custom nodes")
-	static UCustomTimeline* StartCustomTimeline(UObject* worldContextObject,float playRate, float& outputValue,UCustomTimeline*& ref);
+	static UCustomTimeline* StartCustomTimeline(UObject* worldContextObject,float playRate, float& outputValue,float& realDeltaTime,UCustomTimeline*& ref);
 
 	/**Node used to stop a timeline immediately. Triggers 'Finished' execution on the timeline.
 	*@param ref - Reference to the timeline to stop.
@@ -45,16 +45,21 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(HidePin="worldContextObject", DefaultToSelf = "worldContextObject"), Category = "Custom nodes")
 	static void StopCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref);
 
+
+
 private:
 	UObject* WorldContextObject;
 	UWorld* World;
 	float timerDuration;
 	bool running;
+	float* realDeltaTime;
 
-protected:
-	// Inherited via FTickableGameObject
-	virtual void Tick(float DeltaTime) override;
+	/** Delegate for callbacks to Tick */
+	FTickerDelegate TickDelegate;
 
-	virtual TStatId GetStatId() const override;
+	/** Handle to various registered delegates */
+	FDelegateHandle TickDelegateHandle;
+
+	bool Tick(float DeltaTime);
 
 };
