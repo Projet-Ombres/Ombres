@@ -26,14 +26,26 @@ UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObjec
 
 
 
-void UCustomTimeline::StopCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref)
+void UCustomTimeline::FinishCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref)
 {
+
+	UE_LOG(LogTemp, Log, TEXT("name : %s"), *ref->GetName());
+
+
 	if (IsValid(ref)) {
 		FTicker::GetCoreTicker().RemoveTicker(ref->TickDelegateHandle);
 		ref->running = false;
 		ref->Finished.Broadcast();
 	}
 	
+}
+
+void UCustomTimeline::StopCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref)
+{
+	if (IsValid(ref)) {
+		FTicker::GetCoreTicker().RemoveTicker(ref->TickDelegateHandle);
+		ref->running = false;
+	}
 }
 
 bool UCustomTimeline::Tick(float DeltaTime)
@@ -45,12 +57,19 @@ bool UCustomTimeline::Tick(float DeltaTime)
 
 	*value += DeltaTime/timerDuration;
 
+
+
 	if (*value < 1) {
 		Update.Broadcast();
 	}
 	else {
-		StopCustomTimeline(WorldContextObject, this);
+		FinishCustomTimeline(WorldContextObject, this);
 	}
 	return true;
+}
+
+
+bool UCustomTimeline::IsRunning() {
+	return running;
 }
 
