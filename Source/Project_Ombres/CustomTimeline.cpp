@@ -24,17 +24,21 @@ UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObjec
 	return newTimeline;
 }
 
+
+
 void UCustomTimeline::StopCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("REMOVED timeline"), *ref->GetName());
-	FTicker::GetCoreTicker().RemoveTicker(ref->TickDelegateHandle);
-	ref->running = false;
-	ref->Finished.Broadcast();
+	if (IsValid(ref)) {
+		FTicker::GetCoreTicker().RemoveTicker(ref->TickDelegateHandle);
+		ref->running = false;
+		ref->Finished.Broadcast();
+	}
+	
 }
 
 bool UCustomTimeline::Tick(float DeltaTime)
 {
-	//UE_LOG(LogTemp, Log, TEXT("custom timeline : %s"),*GetName());
+	//UE_LOG(LogTemp, Log, TEXT("name : %s"),*GetName());
 	if (!running) { return false; }
 
 	*realDeltaTime = DeltaTime;
