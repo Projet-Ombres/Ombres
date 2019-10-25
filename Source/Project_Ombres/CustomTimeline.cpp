@@ -7,7 +7,7 @@
 
 
 
-UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObject, float playRate,float& outputValue,float& realDeltaTime,UCustomTimeline*& ref)
+UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObject, float playRate,float startTime,float& outputValue,float& realDeltaTime,UCustomTimeline*& ref)
 {
 	UCustomTimeline* newTimeline = NewObject<UCustomTimeline>();
 	newTimeline->TickDelegate = FTickerDelegate::CreateUObject(newTimeline, &UCustomTimeline::Tick);
@@ -15,7 +15,7 @@ UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObjec
 	newTimeline->WorldContextObject = worldContextObject;
 	newTimeline->World = GEngine->GetWorldFromContextObjectChecked(worldContextObject);
 	newTimeline->timerDuration = 1 / playRate;
-	outputValue= 0;
+	outputValue= startTime;
 	realDeltaTime = 0;
 	newTimeline->realDeltaTime = &realDeltaTime;
 	newTimeline->value = &outputValue;
