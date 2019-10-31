@@ -10,6 +10,7 @@
 /**
  * 
  */
+
 UCLASS()
 class PROJECT_OMBRES_API AEditableNavLink : public ANavLinkProxy
 {
