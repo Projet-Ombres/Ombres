@@ -23,8 +23,14 @@ public:
 	FVector left;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = EditableNavLink, Meta = (MakeEditWidget = true))
 	FVector right;
+
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	//je suis obligé de mettre l'implémentation ici pour qu'elle ne soit pas incluse dans les build (c'est une feature editor-only) et le WITH_EDITOR ne fonctionne que dans le header (RIP)
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override
+	{
+		Super::PostEditChangeProperty(PropertyChangedEvent);
+		SetSmartLinkPositions();
+	}
 #endif
 
 	

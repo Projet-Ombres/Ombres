@@ -11,14 +11,6 @@ AEditableNavLink::AEditableNavLink() {
 }
 
 void AEditableNavLink::SetSmartLinkPositions() {
-	
-	SmartLinkComp->LinkRelativeStart = left;
-	SmartLinkComp->LinkRelativeEnd = right;
-	
+	GetSmartLinkComp()->SetLinkData(left, right, ENavLinkDirection::BothWays);
 }
 
-void AEditableNavLink::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-	SetSmartLinkPositions();
-}
