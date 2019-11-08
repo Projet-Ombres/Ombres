@@ -13,5 +13,11 @@
 				"NavigationSystem"
 			]
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "HoudiniEngine",
+			"Enabled": true
+		}
 	]
 }
