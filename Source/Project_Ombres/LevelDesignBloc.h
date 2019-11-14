@@ -49,8 +49,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FMeshByBlocType_10x10> meshes;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	UStaticMeshComponent* StaticMeshComponent;
+
 
 
 private:

@@ -18,6 +18,9 @@ public:
 	UPROPERTY()
 	TArray<FVector> vertices;
 
+	UPROPERTY()
+	TArray<FVector> binormals;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,5 +37,7 @@ public:
 
 private:
 	void UpdateConstruction();
+	void DrawDebugStrings();
+	FTimerHandle timerHandle;
 
 };

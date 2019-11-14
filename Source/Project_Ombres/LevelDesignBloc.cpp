@@ -5,11 +5,14 @@
 #include "Components/StaticMeshComponent.h"
 #include "OmbresUtilities.h"
 #include "Math/UnrealMathUtility.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 ALevelDesignBloc::ALevelDesignBloc()
 {
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	StaticMeshComponent->SetRelativeLocation(FVector(0, 0, 0));
 	StaticMeshComponent->AttachToComponent(RootComponent,FAttachmentTransformRules::KeepRelativeTransform);
 }
 
@@ -18,7 +21,12 @@ ALevelDesignBloc::ALevelDesignBloc()
 void ALevelDesignBloc::UpdateBlocPosition()
 {
 	if (IsValid(generatedLevel) && generatedLevel->vertices.Num()>0 && generatedLevel->vertices.IsValidIndex(Index)) {
-		SetActorLocation(generatedLevel->vertices[Index]);
+		FVector position = generatedLevel->vertices[Index];
+		FRotator rotation = generatedLevel->binormals[Index].ToOrientationRotator();
+		//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), position, position + generatedLevel->binormals[Index] * 100,10,FLinearColor::Blue,5,1);
+		SetActorLocation(position);
+		SetActorRotation(rotation);
+
 	}
 }
 
