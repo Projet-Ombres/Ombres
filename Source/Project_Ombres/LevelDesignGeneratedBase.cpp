@@ -6,11 +6,15 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
+#include "Components/TextRenderComponent.h"
+
 
 // Sets default values
 ALevelDesignGeneratedBase::ALevelDesignGeneratedBase()
 {
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	textRendersParent = CreateDefaultSubobject<USceneComponent>(TEXT("TextRenders"));
+	textRendersParent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	StaticMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
@@ -23,18 +27,19 @@ void ALevelDesignGeneratedBase::BeginPlay()
 
 void ALevelDesignGeneratedBase::OnConstruction(const FTransform& Transform)
 {
+	Super::OnConstruction(Transform);
 	UpdateConstruction();
-	GetWorld()->GetTimerManager().ClearTimer(timerHandle);
-	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &ALevelDesignGeneratedBase::DrawDebugStrings, 1, true);
 }
 
 
 
 void ALevelDesignGeneratedBase::UpdateConstruction()
 {
-	if (IsValid(StaticMeshComponent->GetStaticMesh())) {
+	if (bRebake && IsValid(StaticMeshComponent->GetStaticMesh())) {
 		FPositionVertexBuffer* vertexBuffer = &StaticMeshComponent->GetStaticMesh()->RenderData->LODResources[0].VertexBuffers.PositionVertexBuffer;
 		FStaticMeshVertexBuffer* staticMeshVertexBuffer=&StaticMeshComponent->GetStaticMesh()->RenderData->LODResources[0].VertexBuffers.StaticMeshVertexBuffer;
+		
+		
 
 		if (vertexBuffer) {
 			const int vertexCount = vertexBuffer->GetNumVertices();
@@ -45,21 +50,26 @@ void ALevelDesignGeneratedBase::UpdateConstruction()
 			binormals.Empty();
 			binormals.SetNum(vertexCount);
 
+
+			while (textRendersParent->GetNumChildrenComponents() > 0) {
+				textRendersParent->GetChildComponent(0)->DestroyComponent();
+			}
+
 			for (int i = 0; i < vertexCount; i++) {
 				const FVector worldSpaceVertexLocation = GetActorLocation() + GetTransform().TransformVector(vertexBuffer->VertexPosition(i));
 				binormals[i]=staticMeshVertexBuffer->VertexTangentY(i);
 				vertices[i] = worldSpaceVertexLocation;
-				
+				UTextRenderComponent* textRender = NewObject<UTextRenderComponent>(this);
+				textRender->AttachToComponent(textRendersParent, FAttachmentTransformRules::KeepRelativeTransform);
+				textRender->SetWorldLocation(worldSpaceVertexLocation);
+				textRender->SetWorldRotation(binormals[i].ToOrientationRotator());
+				textRender->SetText(FText::FromString(FString::FromInt(i)));
+				textRender->RegisterComponent();
+				textRender->SetRelativeScale3D(FVector(0.01, 0.01, 0.01));
+				textRender->SetTextRenderColor(textColor.ToFColor(false));
 			}
 		}
 	}
 }
 
-void ALevelDesignGeneratedBase::DrawDebugStrings()
-{
-	/*for (int i = 0, l = vertices.Num(); i < l; i++) {
-
-		DrawDebugString(GetWorld(), vertices[i], FString::FromInt(i), nullptr, FColor::Green, 2.0f, false);
-	}*/
-}
 
