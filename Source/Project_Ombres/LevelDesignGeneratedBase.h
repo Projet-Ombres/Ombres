@@ -21,12 +21,22 @@ public:
 	UPROPERTY()
 	TArray<FVector> binormals;
 
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* textRendersParent;
+
+	UPROPERTY(EditAnywhere)
+	FLinearColor textColor;
+
+	UPROPERTY(EditInstanceOnly)
+	bool bRebake;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override {
+		Super::PostEditChangeProperty(PropertyChangedEvent);
 		UpdateConstruction();
 	}
 #endif
@@ -37,7 +47,5 @@ public:
 
 private:
 	void UpdateConstruction();
-	void DrawDebugStrings();
-	FTimerHandle timerHandle;
 
 };
