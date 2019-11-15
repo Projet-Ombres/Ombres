@@ -39,7 +39,6 @@ void ALevelDesignGeneratedBase::UpdateConstruction()
 		FPositionVertexBuffer* vertexBuffer = &StaticMeshComponent->GetStaticMesh()->RenderData->LODResources[0].VertexBuffers.PositionVertexBuffer;
 		FStaticMeshVertexBuffer* staticMeshVertexBuffer=&StaticMeshComponent->GetStaticMesh()->RenderData->LODResources[0].VertexBuffers.StaticMeshVertexBuffer;
 		
-		
 
 		if (vertexBuffer) {
 			const int vertexCount = vertexBuffer->GetNumVertices();
@@ -57,7 +56,8 @@ void ALevelDesignGeneratedBase::UpdateConstruction()
 
 			for (int i = 0; i < vertexCount; i++) {
 				const FVector worldSpaceVertexLocation = GetActorLocation() + GetTransform().TransformVector(vertexBuffer->VertexPosition(i));
-				binormals[i]=staticMeshVertexBuffer->VertexTangentY(i);
+				binormals[i]= staticMeshVertexBuffer->VertexTangentZ(i);
+
 				vertices[i] = worldSpaceVertexLocation;
 				UTextRenderComponent* textRender = NewObject<UTextRenderComponent>(this);
 				textRender->AttachToComponent(textRendersParent, FAttachmentTransformRules::KeepRelativeTransform);
