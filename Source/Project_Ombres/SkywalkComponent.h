@@ -2,15 +2,14 @@
 
 #pragma once
 
-#include "CustomTimeline.h"
-#include "GameFramework/Character.h"
-#include "MeshPassProcessor.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "MeshPassProcessor.h"
+#include "GameFramework/Character.h"
 #include "SkywalkComponent.generated.h"
 
 
-UCLASS()
+UCLASS(ClassGroup=(Custom),meta=(BlueprintSpawnableComponent),Blueprintable)
 class PROJECT_OMBRES_API USkywalkComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -85,6 +84,12 @@ public:
 	UPROPERTY()
 	FVector ScrapFinalMiddlePosition2;
 
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
+	bool Active;
+
+	UFUNCTION(BlueprintCallable)
+	void ReleaseScraps();
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -111,16 +116,11 @@ private:
 	UPROPERTY()
 	AActor* NearestScrap;
 
-	UPROPERTY()
-	bool Active;
+	
 
 	UPROPERTY()
 	AActor* LastPlatformSpawned;
 
-	
-
-	UPROPERTY()
-	UCustomTimeline* Timeline;
 
 	UFUNCTION()
 	void SetCoolDownTimer(float DeltaTime);
@@ -134,8 +134,7 @@ private:
 	UFUNCTION()
 	void SpawnPlatform(FVector Position);
 
-	UFUNCTION()
-	void ReleaseScraps();
+	
 
 	UFUNCTION()
 	AActor* GetClosestScrap();
@@ -158,8 +157,8 @@ private:
 	UFUNCTION()
 	void WaitForZeroPointTwoSeconds();
 
-	float timelineOutputValue;
-	float timelineDeltaTime;
+
+	float currentTime;
 	FTimerHandle secondLineTimerHandle;
 
 };

@@ -45,6 +45,12 @@ public:
 	UFUNCTION()
 	void Timeline2FinishedCallback(float val);
 
+	UPROPERTY()
+	float Timeline1Value;
+
+	UPROPERTY()
+	float Timeline2Value;
+
 
 
 protected:
@@ -78,6 +84,12 @@ private:
 	USkywalkComponent* Skywalk;
 
 	FTimerHandle timerHandle;
+
+	UPROPERTY()
+	TEnumAsByte<ETimelineDirection::Type> TimelineDirection1;
+
+	UPROPERTY()
+	TEnumAsByte<ETimelineDirection::Type> TimelineDirection2;
 
 	void ResetPhysics();
 

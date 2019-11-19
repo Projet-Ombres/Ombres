@@ -15,7 +15,7 @@ public:
 	// Sets default values for this actor's properties
 	ASkywalkPlatform();
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY()

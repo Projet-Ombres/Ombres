@@ -16,6 +16,21 @@ USkywalkComponent::USkywalkComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	SkyWalkDuration= 3;
+	SkyWalkCoolDown = 10;
+	BringScrapDuration = 0.3;
+	PlaceScrapDuration = 0.15;
+	MaxRangeToGrabScrap = 2000;
+	DistanceFromCamera = 700;
+	NoiseAmplitude = 100;
+	SpawnDistance = 400;
+	ScrapsPerLine = 2;
+	ScrapsLevitationDuration = 2;
+	DistanceToGrabNewScraps = 110;
+	SpaceBetweenScraps = 100;
+	DistanceFromCamera2 = 1400;
+	BasePlatformAngle = 15;
+
 }
 
 
@@ -30,30 +45,39 @@ void USkywalkComponent::BeginPlay()
 void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	//UE_LOG(LogTemp, Warning, TEXT("Active : %s"), (Active ? TEXT("True") : TEXT("False")));
+	
+	if (Active) {
+		currentTime += DeltaTime;
+
+
+		if (currentTime >= SkyWalkDuration) {
+			FinishSkywalk();
+		}
+		else {
+			UpdateSkywalk();
+		}
+	}
 }
 
 
 void USkywalkComponent::StartSkyWalk()
 {
-	Player->GetCharacterMovement()->MaxWalkSpeed = 500;
-	Active = true;
-	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	cameraManager->ViewPitchMin = -45;
-	cameraManager->ViewPitchMax = 45;
-
 	if (!OnCoolDown) {
+		Player->GetCharacterMovement()->MaxWalkSpeed = 500;
+		Active = true;
+		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+		cameraManager->ViewPitchMin = -45;
+		cameraManager->ViewPitchMax = 45;
+
+		UE_LOG(LogTemp, Warning, TEXT("Start skywalk"));
+
 		CurrentCoolDown = 0;
 		OnCoolDown = true;
 		LastPlatformPosition = Player->GetActorLocation();
-		UCustomTimeline::StartCustomTimeline(GetWorld(), 1 / SkyWalkDuration, 0, timelineOutputValue, timelineDeltaTime, Timeline);
+		currentTime = 0;
 
-		FScriptDelegate UpdateDelegate;
-		UpdateDelegate.BindUFunction(this, FName("UpdateSkywalk"));
-		Timeline->Update.Add(UpdateDelegate);
-
-		FScriptDelegate FinishedDelegate;
-		FinishedDelegate.BindUFunction(this, FName("FinishSkywalk"));
-		Timeline->Finished.Add(FinishedDelegate);
+	
 	}
 }
 
@@ -65,7 +89,6 @@ void USkywalkComponent::EndSkyWalk()
 	cameraManager->ViewPitchMax = 90;
 	Active = false;
 	OnCoolDown = true;
-	UCustomTimeline::StopCustomTimeline(this, Timeline);
 	ScrapsInUse.Empty();
 }
 
@@ -84,6 +107,8 @@ void USkywalkComponent::ResetCoolDown()
 
 void USkywalkComponent::UpdateSkywalk()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Update skywalk"));
+
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector playerPosition = Player->GetActorLocation();
 	FVector cameraPosition = cameraManager->GetCameraLocation();
@@ -153,13 +178,16 @@ void USkywalkComponent::MoveClosestScrap(int LineIndex,int Line)
 {
 	NearestScrap=GetClosestScrap();
 	if (IsValid(NearestScrap)) {
-		UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(NearestScrap->GetComponentByClass(UStaticMesh::StaticClass()));
-		staticMeshComponent->SetSimulatePhysics(false);
-		staticMeshComponent->AttachToComponent(NearestScrap->GetRootComponent(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepWorld,true));
-		staticMeshComponent->SetEnableGravity(false);
-		staticMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		ScrapsInWorld.Remove(NearestScrap);
-		MoveScrap(LineIndex, Line);
+		UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(NearestScrap->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+		if (IsValid(staticMeshComponent)) {
+			staticMeshComponent->SetSimulatePhysics(false);
+			staticMeshComponent->AttachToComponent(NearestScrap->GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true));
+			staticMeshComponent->SetEnableGravity(false);
+			staticMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+			ScrapsInWorld.Remove(NearestScrap);
+			MoveScrap(LineIndex, Line);
+		}
+		
 	
 	}
 	else {

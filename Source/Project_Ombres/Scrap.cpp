@@ -17,18 +17,29 @@ AScrap::AScrap()
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMeshComponent"), false);
 	StaticMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
+	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	StaticMeshComponent->SetStaticMesh(MeshAsset.Object);
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve1(TEXT("/Game/Curves/ScrapGrabCurve"));
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("StaticMesh'/Engine/BasicShapes/BasicShapeMaterial'"));
+	StaticMeshComponent->SetMaterial(0, Material.Object);
+
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	StaticMeshComponent->SetGenerateOverlapEvents(false);
+
+	
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve1(TEXT("/Game/BP/Curves/ScrapGrabCurve"));
 	check(Curve1.Succeeded());
 
 	FloatCurve1 = Curve1.Object;
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve2(TEXT("/Game/Curves/ScrapPlaceCurve"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve2(TEXT("/Game/BP/Curves/ScrapPlaceCurve"));
 	check(Curve2.Succeeded());
 
 	FloatCurve2 = Curve2.Object;
+	
 
 }
 
@@ -48,13 +59,13 @@ void AScrap::BeginPlay()
 		Timeline1->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 
 		Timeline1->SetPropertySetObject(this);
-		Timeline1->SetDirectionPropertyName(FName("Direction"));
+		Timeline1->SetDirectionPropertyName(FName("TimelineDirection1"));
 
 		Timeline1->SetLooping(false);
 		Timeline1->SetTimelineLength(1);
 		Timeline1->SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
 
-		Timeline1->SetPlaybackPosition(0, false);
+		Timeline1->SetPlaybackPosition(0.0f, false);
 
 		onTimelineUpdateCallback1.BindUFunction(this, FName{ TEXT("Timeline1UpdateCallback") });
 		onTimelineFinishedCallback1.BindUFunction(this, FName{ TEXT("Timeline1FinishedCallback") });
@@ -71,20 +82,14 @@ void AScrap::BeginPlay()
 
 
 		Timeline2 = NewObject<UTimelineComponent>(this, FName("Timeline2"));
-		Timeline2->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 
-		Timeline2->SetPropertySetObject(this);
-		Timeline2->SetDirectionPropertyName(FName("Direction"));
 
 		Timeline2->SetLooping(false);
 		Timeline2->SetTimelineLength(1);
-		Timeline2->SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
 
-		Timeline2->SetPlaybackPosition(0, false);
-
-		onTimelineUpdateCallback2.BindUFunction(this, FName{ TEXT("Timeline2UpdateCallback") });
-		onTimelineFinishedCallback2.BindUFunction(this, FName{ TEXT("Timeline2FinishedCallback") });
-		Timeline2->AddInterpFloat(FloatCurve1, onTimelineUpdateCallback2);
+		onTimelineUpdateCallback2.BindUFunction(this, FName("Timeline2UpdateCallback"));
+		onTimelineFinishedCallback2.BindUFunction(this, FName("Timeline2FinishedCallback"));
+		Timeline2->AddInterpFloat(FloatCurve2, onTimelineUpdateCallback2);
 		Timeline2->SetTimelineFinishedFunc(onTimelineFinishedCallback2);
 
 		Timeline2->RegisterComponent();
@@ -101,6 +106,11 @@ void AScrap::Tick(float DeltaTime)
 
 	if (Timeline1 != NULL) {
 		Timeline1->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
+		
+	}
+
+	if (Timeline2 != NULL) {
+		Timeline2->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
 	}
 
 }

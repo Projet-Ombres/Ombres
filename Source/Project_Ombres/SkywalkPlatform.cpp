@@ -3,13 +3,27 @@
 
 #include "SkywalkPlatform.h"
 #include "TimerManager.h"
+#include "ConstructorHelpers.h"
+#include "Engine/StaticMesh.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 ASkywalkPlatform::ASkywalkPlatform()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>(FName("Root"));
+
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMeshComponent"));
+	
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
+	StaticMeshComponent->SetStaticMesh(MeshAsset.Object);
+	StaticMeshComponent->SetVisibility(false);
+
+	StaticMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 }
 
 // Called when the game starts or when spawned
@@ -17,7 +31,6 @@ void ASkywalkPlatform::BeginPlay()
 {
 	Super::BeginPlay();
 	GetWorldTimerManager().SetTimer(timerHandle, this, &ASkywalkPlatform::DestroyActor, 1 / FadeTime);
-	
 }
 
 // Called every frame
