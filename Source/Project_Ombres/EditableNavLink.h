@@ -42,16 +42,10 @@ public:
 	AEditableNavLink();
 	void SetSmartLinkPositions();
 
-	UPROPERTY(VisibleAnywhere)
-	TArray<FSphereCouple> SphereCouples;
-
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* SphereComponentsParent;
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnPointReached(AActor* agent,FVector targetPosition);
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EditableNavLink, Meta = (MakeEditWidget = true))
+	FVector left;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EditableNavLink, Meta = (MakeEditWidget = true))
+	FVector right;
 
 #if WITH_EDITOR
 	//je suis obligé de mettre l'implémentation ici pour qu'elle ne soit pas incluse dans les build (c'est une feature editor-only) et le WITH_EDITOR ne fonctionne que dans le header (RIP)
@@ -66,10 +60,4 @@ public:
 
 #endif
 
-private:
-	UFUNCTION()
-	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-	void ResetReferences();
 };

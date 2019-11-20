@@ -21,17 +21,26 @@ public:
 	UPROPERTY()
 	float FadeTime;
 
+	UPROPERTY()
+	class USkywalkComponent* skywalkComponent;
+
+	UFUNCTION()
+	void SetDelay(float value);
+
+	UFUNCTION()
+	void Init();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 private:
 	FTimerHandle timerHandle;
+	FTimerHandle secondLineTimerHandle;
 
 	UFUNCTION()
 	void DestroyActor();
+
+	UFUNCTION()
+	void SpawnSecondLine();
 };

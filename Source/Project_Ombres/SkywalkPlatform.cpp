@@ -6,11 +6,11 @@
 #include "ConstructorHelpers.h"
 #include "Engine/StaticMesh.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "SkywalkComponent.h"
 
 // Sets default values
 ASkywalkPlatform::ASkywalkPlatform()
 {
-	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(FName("Root"));
 
@@ -22,26 +22,36 @@ ASkywalkPlatform::ASkywalkPlatform()
 
 	StaticMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
-	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	StaticMeshComponent->SetCollisionProfileName(FName(TEXT("BlockAllDynamic")));
+	StaticMeshComponent->SetRelativeScale3D(FVector(3,3,3));
 }
+
+
 
 // Called when the game starts or when spawned
 void ASkywalkPlatform::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorldTimerManager().SetTimer(timerHandle, this, &ASkywalkPlatform::DestroyActor, 1 / FadeTime);
 }
 
-// Called every frame
-void ASkywalkPlatform::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+void ASkywalkPlatform::Init() {
+	GetWorldTimerManager().SetTimer(timerHandle, this, &ASkywalkPlatform::DestroyActor, FadeTime);
 }
+
 
 void ASkywalkPlatform::DestroyActor()
 {
 	Destroy();
 }
 
+
+void ASkywalkPlatform::SetDelay(float value)
+{
+	GetWorld()->GetTimerManager().SetTimer(secondLineTimerHandle, this, &ASkywalkPlatform::SpawnSecondLine, value, false);
+}
+
+
+void ASkywalkPlatform::SpawnSecondLine() {
+	skywalkComponent->SpawnSecondScrapsLine();
+}

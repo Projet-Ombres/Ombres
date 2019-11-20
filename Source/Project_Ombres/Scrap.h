@@ -21,11 +21,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* StaticMeshComponent;
 
-	UPROPERTY()
-	UTimelineComponent* Timeline1;
-
-	UPROPERTY()
-	UTimelineComponent* Timeline2;
 
 	UPROPERTY()
 	UCurveFloat* FloatCurve1;
@@ -44,12 +39,6 @@ public:
 
 	UFUNCTION()
 	void Timeline2FinishedCallback(float val);
-
-	UPROPERTY()
-	float Timeline1Value;
-
-	UPROPERTY()
-	float Timeline2Value;
 
 
 
@@ -85,12 +74,14 @@ private:
 
 	FTimerHandle timerHandle;
 
-	UPROPERTY()
-	TEnumAsByte<ETimelineDirection::Type> TimelineDirection1;
-
-	UPROPERTY()
-	TEnumAsByte<ETimelineDirection::Type> TimelineDirection2;
 
 	void ResetPhysics();
+
+	bool grabbing;
+	bool placing;
+	float timeElapsed;
+
+	float bringDuration;
+	float placeDuration;
 
 };

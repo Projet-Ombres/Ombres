@@ -90,6 +90,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ReleaseScraps();
 
+	UFUNCTION()
+	void SpawnSecondScrapsLine();
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -132,7 +135,7 @@ private:
 	void UpdateSkywalk();
 
 	UFUNCTION()
-	void SpawnPlatform(FVector Position);
+	class ASkywalkPlatform* SpawnPlatform(FVector Position);
 
 	
 
@@ -145,8 +148,6 @@ private:
 	UFUNCTION()
 	void SpawnScrapsLine();
 
-	UFUNCTION()
-	void SpawnSecondScrapsLine();
 
 	UFUNCTION()
 	void MoveScrap(int LineIndex, int Line);

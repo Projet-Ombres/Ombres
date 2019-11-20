@@ -7,6 +7,7 @@
 #include "ConstructorHelpers.h"
 #include "TimerManager.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Curves/CurveFloat.h"
 
 // Sets default values
 AScrap::AScrap()
@@ -26,7 +27,13 @@ AScrap::AScrap()
 	StaticMeshComponent->SetMaterial(0, Material.Object);
 
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	StaticMeshComponent->SetCollisionProfileName(FName(TEXT("Custom")));
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+
+
 	StaticMeshComponent->SetGenerateOverlapEvents(false);
 
 	
@@ -39,6 +46,8 @@ AScrap::AScrap()
 	check(Curve2.Succeeded());
 
 	FloatCurve2 = Curve2.Object;
+
+	SetActorTickEnabled(false);
 	
 
 }
@@ -49,54 +58,9 @@ AScrap::AScrap()
 void AScrap::BeginPlay()
 {
 	Super::BeginPlay();
-	StaticMeshComponent->SetWorldScale3D(FVector(FMath::FRandRange(0.2,0.8), FMath::FRandRange(0.2, 0.8), FMath::FRandRange(0.2, 0.8)));
-
-	FOnTimelineFloat onTimelineUpdateCallback1;
-	FOnTimelineEventStatic onTimelineFinishedCallback1;
-
-	if (FloatCurve1 != NULL) {
-		Timeline1 = NewObject<UTimelineComponent>(this, FName("Timeline1"));
-		Timeline1->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-
-		Timeline1->SetPropertySetObject(this);
-		Timeline1->SetDirectionPropertyName(FName("TimelineDirection1"));
-
-		Timeline1->SetLooping(false);
-		Timeline1->SetTimelineLength(1);
-		Timeline1->SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
-
-		Timeline1->SetPlaybackPosition(0.0f, false);
-
-		onTimelineUpdateCallback1.BindUFunction(this, FName{ TEXT("Timeline1UpdateCallback") });
-		onTimelineFinishedCallback1.BindUFunction(this, FName{ TEXT("Timeline1FinishedCallback") });
-		Timeline1->AddInterpFloat(FloatCurve1, onTimelineUpdateCallback1);
-		Timeline1->SetTimelineFinishedFunc(onTimelineFinishedCallback1);
-
-		Timeline1->RegisterComponent();
-	}
-
-	FOnTimelineFloat onTimelineUpdateCallback2;
-	FOnTimelineEventStatic onTimelineFinishedCallback2;
-
-	if (FloatCurve2 != NULL) {
-
-
-		Timeline2 = NewObject<UTimelineComponent>(this, FName("Timeline2"));
-
-
-		Timeline2->SetLooping(false);
-		Timeline2->SetTimelineLength(1);
-
-		onTimelineUpdateCallback2.BindUFunction(this, FName("Timeline2UpdateCallback"));
-		onTimelineFinishedCallback2.BindUFunction(this, FName("Timeline2FinishedCallback"));
-		Timeline2->AddInterpFloat(FloatCurve2, onTimelineUpdateCallback2);
-		Timeline2->SetTimelineFinishedFunc(onTimelineFinishedCallback2);
-
-		Timeline2->RegisterComponent();
-	}
-
-
-	
+	//StaticMeshComponent->SetWorldScale3D(FVector(FMath::FRandRange(0.2,0.8), FMath::FRandRange(0.2, 0.8), FMath::FRandRange(0.2, 0.8)));
+	float rand = FMath::FRandRange(0.2, 0.8);
+	StaticMeshComponent->SetWorldScale3D(FVector(rand, rand, rand));
 }
 
 // Called every frame
@@ -104,19 +68,32 @@ void AScrap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (Timeline1 != NULL) {
-		Timeline1->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
-		
+	if (grabbing) {
+		timeElapsed += DeltaTime;
+		float percent = timeElapsed / bringDuration;
+		if (percent < 1) {
+			Timeline1UpdateCallback(FloatCurve1->GetFloatValue(percent));
+		}
+		else {
+			Timeline1FinishedCallback(1);
+		}
 	}
-
-	if (Timeline2 != NULL) {
-		Timeline2->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
+	else if (placing) {
+		timeElapsed += DeltaTime;
+		float percent = timeElapsed / placeDuration;
+		if (percent < 1) {
+			Timeline2UpdateCallback(FloatCurve2->GetFloatValue(percent));
+		}
+		else {
+			Timeline2FinishedCallback(1);
+		}
 	}
 
 }
 
 void AScrap::StartMovingToTarget(float NoiseAmplitude, ACharacter* Player, float ScrapBringDuration, float ScrapPlaceDuration, int LineIndex, int Line,float LifeTime)
 {
+	UE_LOG(LogTemp, Warning, TEXT("LineIndex : %d, Line : %d"), LineIndex, Line);
 	this->Player = Player;
 	this->LineIndex = LineIndex;
 	this->Line = Line;
@@ -126,8 +103,12 @@ void AScrap::StartMovingToTarget(float NoiseAmplitude, ACharacter* Player, float
 	StartPosition1 = GetActorLocation();
 	NoiseRefPosition = UKismetMathLibrary::RandomUnitVectorInConeInDegrees(FVector(0, 0, -1), 45) * NoiseAmplitude;
 	BigNoiseRefPosition = UKismetMathLibrary::RandomUnitVector() * NoiseAmplitude * 3;
+	bringDuration = ScrapBringDuration;
+	placeDuration = ScrapPlaceDuration;
 
-	Timeline1->PlayFromStart();
+	grabbing = true;
+	timeElapsed = 0;
+	SetActorTickEnabled(true);
 }
 
 FVector AScrap::CalculateScrapTargetPosition(FVector middlePosition, FVector rightOffset, int lineIndex)
@@ -151,7 +132,9 @@ void AScrap::Timeline1UpdateCallback(float val)
 void AScrap::Timeline1FinishedCallback(float val)
 {
 	StartPosition2 = GetActorLocation();
-	Timeline2->PlayFromStart();
+	grabbing = false;
+	placing = true;
+	timeElapsed = 0;
 }
 
 
@@ -165,7 +148,10 @@ void AScrap::Timeline2UpdateCallback(float val)
 
 void AScrap::Timeline2FinishedCallback(float val)
 {
-	GetWorldTimerManager().SetTimer(timerHandle, this, &AScrap::ResetPhysics, 1 / LifeTime, false);
+	placing = false;
+	GetWorldTimerManager().SetTimer(timerHandle, this, &AScrap::ResetPhysics,LifeTime, false);
+	SetActorTickEnabled(false);
+
 }
 
 
