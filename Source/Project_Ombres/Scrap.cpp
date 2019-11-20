@@ -53,8 +53,6 @@ AScrap::AScrap()
 }
 
 
-
-// Called when the game starts or when spawned
 void AScrap::BeginPlay()
 {
 	Super::BeginPlay();
@@ -63,7 +61,7 @@ void AScrap::BeginPlay()
 	StaticMeshComponent->SetWorldScale3D(FVector(rand, rand, rand));
 }
 
-// Called every frame
+
 void AScrap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

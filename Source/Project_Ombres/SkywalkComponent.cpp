@@ -40,6 +40,8 @@ void USkywalkComponent::BeginPlay()
 	Super::BeginPlay();
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	CurrentCoolDown = SkyWalkCoolDown;
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AScrap::StaticClass(), ScrapsInWorld);
 }
 
 
@@ -58,7 +60,10 @@ void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		else {
 			UpdateSkywalk();
 		}
+
+		
 	}
+	SetCoolDownTimer(DeltaTime);
 }
 
 
@@ -98,8 +103,13 @@ void USkywalkComponent::EndSkyWalk()
 
 void USkywalkComponent::SetCoolDownTimer(float DeltaTime)
 {
+	if (!OnCoolDown) { return; }
+
 	CurrentCoolDown += DeltaTime;
-	OnCoolDown = (CurrentCoolDown >= SkyWalkCoolDown);
+
+	if (CurrentCoolDown > SkyWalkCoolDown) {
+		OnCoolDown = false;
+	}
 }
 
 void USkywalkComponent::ResetCoolDown()
@@ -115,12 +125,13 @@ void USkywalkComponent::UpdateSkywalk()
 	FVector playerPosition = Player->GetActorLocation();
 	FVector cameraPosition = cameraManager->GetCameraLocation();
 	FVector cameraForwardVector = cameraManager->GetCameraRotation().Vector();
+	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*30;
 	FVector offsetVector = FVector(0, 0, -25);
 
-	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector;
-	ScrapFinalMiddlePosition = playerPosition + cameraForwardVector * 350 + offsetVector;
-	ScrapMiddlePosition2 = cameraPosition + cameraForwardVector * DistanceFromCamera2;
-	ScrapMiddlePosition = cameraPosition + cameraForwardVector * DistanceFromCamera;
+	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector-cameraRightVector;
+	ScrapFinalMiddlePosition = playerPosition + cameraForwardVector * 350 + offsetVector - cameraRightVector;
+	ScrapMiddlePosition2 = cameraPosition + cameraForwardVector * DistanceFromCamera2- cameraRightVector;
+	ScrapMiddlePosition = cameraPosition + cameraForwardVector * DistanceFromCamera- cameraRightVector;
 	ScrapRightOffset = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * SpaceBetweenScraps;
 
 	if ((LastPlatformPosition - playerPosition).Size()>DistanceToGrabNewScraps) {
