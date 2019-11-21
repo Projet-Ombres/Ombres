@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Curves/CurveFloat.h"
 #include "SkywalkPlatform.generated.h"
 
 UCLASS()
@@ -30,17 +31,102 @@ public:
 	UFUNCTION()
 	void Init();
 
+	UPROPERTY()
+	TArray<FVector> firstLineNoiseRefPositions;
+
+	UPROPERTY()
+	TArray<FVector> firstLineBigNoiseRefPositions;
+
+	UPROPERTY()
+	TArray<FVector> secondLineNoiseRefPositions;
+
+	UPROPERTY()
+	TArray<FVector> secondLineBigNoiseRefPositions;
+
+	UPROPERTY()
+	float progression1;
+
+	UPROPERTY()
+	float progression2;
+
+
+	UFUNCTION()
+	void SpawnFirstLine();
+
+	UFUNCTION()
+	void MoveClosestScrap(int LineIndex, int Line);
+
+	UPROPERTY()
+	TArray<AActor*> activeScraps1;
+
+	UPROPERTY()
+	TArray<AActor*> activeScraps2;
+
+	UPROPERTY()
+	TArray<AActor*> levitatingScraps1;
+
+	UPROPERTY()
+	TArray<AActor*> levitatingScraps2;
+
+	UPROPERTY()
+	TArray<FVector> startPositions1;
+
+	UPROPERTY()
+	TArray<FVector> startPositions2;
+
+	UPROPERTY()
+	TArray<FVector> intermediatePositions1;
+
+	UPROPERTY()
+	TArray<FVector> intermediatePositions2;
+
+	UFUNCTION()
+	void AddScrap(AActor* scrapToAdd, int LineIndex, int Line);
+
+	UPROPERTY()
+	float NoiseAmplitude;
+	UPROPERTY()
+	float ScrapLifeTime;
+	UPROPERTY()
+	float BringScrapDuration;
+	UPROPERTY()
+	float PlaceScrapDuration;
+	UPROPERTY()
+	float SpawnDistance;
+
+	UPROPERTY()
+	UCurveFloat* FloatCurve1;
+
+	UPROPERTY()
+	UCurveFloat* FloatCurve2;
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
+	void ResetPhysics1();
+	void ResetPhysics2();
+
+	FVector CalculateScrapTargetPosition(int scrapIndex,int line);
+
+	FVector CalculateScrapFinalPosition(int scrapIndex,int line);
+
 
 private:
+
 	FTimerHandle timerHandle;
+	FTimerHandle timerHandle2;
+	FTimerHandle firstLineTimerHandle;
 	FTimerHandle secondLineTimerHandle;
 
 	UFUNCTION()
 	void DestroyActor();
 
+	
+
 	UFUNCTION()
 	void SpawnSecondLine();
+
 };

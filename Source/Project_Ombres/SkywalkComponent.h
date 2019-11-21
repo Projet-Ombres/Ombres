@@ -91,8 +91,13 @@ public:
 	void ReleaseScraps();
 
 	UFUNCTION()
-	void SpawnSecondScrapsLine();
+	AActor* GetClosestScrap();
 
+	UPROPERTY()
+	TArray<AActor*> ScrapsInWorld;
+
+	UPROPERTY()
+	TArray<AActor*> ScrapsInUse;
 
 protected:
 	virtual void BeginPlay() override;
@@ -111,17 +116,6 @@ private:
 	float CurrentCoolDown;
 
 	UPROPERTY()
-	TArray<AActor*> ScrapsInWorld;
-
-	UPROPERTY()
-	TArray<AActor*> ScrapsInUse;
-
-	UPROPERTY()
-	AActor* NearestScrap;
-
-	
-
-	UPROPERTY()
 	AActor* LastPlatformSpawned;
 
 
@@ -138,25 +132,8 @@ private:
 	class ASkywalkPlatform* SpawnPlatform(FVector Position);
 
 	
-
-	UFUNCTION()
-	AActor* GetClosestScrap();
-
-	UFUNCTION()
-	void MoveClosestScrap(int LineIndex,int Line);
-
-	UFUNCTION()
-	void SpawnScrapsLine();
-
-
-	UFUNCTION()
-	void MoveScrap(int LineIndex, int Line);
-
 	UFUNCTION()
 	void FinishSkywalk();
-
-	UFUNCTION()
-	void WaitForZeroPointTwoSeconds();
 
 
 	float currentTime;
