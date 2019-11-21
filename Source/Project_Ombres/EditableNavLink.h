@@ -5,11 +5,33 @@
 #include "CoreMinimal.h"
 #include "Navigation/NavLinkProxy.h"
 #include "Vector.h"
+#include "NavigationSystem.h"
+#include "Components/SphereComponent.h"
 #include "EditableNavLink.generated.h"
 
 /**
  * 
  */
+
+
+USTRUCT()
+struct FSphereCollision {
+	GENERATED_BODY()
+	int Index;
+	bool Left;
+	UPROPERTY(VisibleAnywhere)
+	USphereComponent* SphereComponent;
+};
+
+USTRUCT()
+struct FSphereCouple {
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	FSphereCollision leftSphere;
+	UPROPERTY(VisibleAnywhere)
+	FSphereCollision rightSphere;
+};
 
 UCLASS()
 class PROJECT_OMBRES_API AEditableNavLink : public ANavLinkProxy
@@ -19,9 +41,10 @@ class PROJECT_OMBRES_API AEditableNavLink : public ANavLinkProxy
 public:
 	AEditableNavLink();
 	void SetSmartLinkPositions();
-	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category=EditableNavLink, Meta = (MakeEditWidget = true))
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EditableNavLink, Meta = (MakeEditWidget = true))
 	FVector left;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = EditableNavLink, Meta = (MakeEditWidget = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EditableNavLink, Meta = (MakeEditWidget = true))
 	FVector right;
 
 #if WITH_EDITOR
@@ -29,10 +52,12 @@ public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override
 	{
 		Super::PostEditChangeProperty(PropertyChangedEvent);
-		SetSmartLinkPositions();
+		
+		if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FNavigationLink, Left) || PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FNavigationLink, Right)) {
+			SetSmartLinkPositions();
+		}
 	}
-#endif
 
-	
+#endif
 
 };
