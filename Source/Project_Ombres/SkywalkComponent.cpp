@@ -25,9 +25,9 @@ USkywalkComponent::USkywalkComponent()
 	DistanceFromCamera = 700;
 	NoiseAmplitude = 100;
 	SpawnDistance = 400;
-	ScrapsPerLine = 2;
+	ScrapsPerLine = 3;
 	ScrapsLevitationDuration = 2;
-	DistanceToGrabNewScraps = 120;
+	DistanceToGrabNewScraps = 100;
 	SpaceBetweenScraps = 100;
 	DistanceFromCamera2 = 1400;
 	BasePlatformAngle = 15;
@@ -139,7 +139,7 @@ void USkywalkComponent::UpdateSkywalk()
 	FVector playerPosition = Player->GetActorLocation();
 	FVector cameraPosition = cameraManager->GetCameraLocation();
 	FVector cameraForwardVector = cameraManager->GetCameraRotation().Vector();
-	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*SpaceBetweenScraps/2;
+	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*(ScrapsPerLine%2==0?SpaceBetweenScraps/2:SpaceBetweenScraps);
 	FVector offsetVector = FVector(0, 0, -25);
 
 	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector-cameraRightVector;
