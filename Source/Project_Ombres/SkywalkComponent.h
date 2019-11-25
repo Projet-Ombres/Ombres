@@ -105,7 +105,7 @@ public:
 	UFUNCTION()
 	void SetCoolDownTimer(float DeltaTime);
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	AActor* LastPlatformSpawned;
 
 	UFUNCTION(BlueprintPure)
