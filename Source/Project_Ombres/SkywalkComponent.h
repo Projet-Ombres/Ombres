@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	float SkyWalkDuration;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float SkyWalkCoolDown;
 
 	UPROPERTY(EditAnywhere)
@@ -69,19 +69,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndSkyWalk();
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ScrapMiddlePosition;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ScrapRightOffset;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ScrapFinalMiddlePosition;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ScrapMiddlePosition2;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ScrapFinalMiddlePosition2;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
@@ -93,11 +93,23 @@ public:
 	UFUNCTION()
 	AActor* GetClosestScrap();
 
+	UFUNCTION(BlueprintCallable)
+	void ResetCoolDown();
+
 	UPROPERTY()
 	TArray<AActor*> ScrapsInWorld;
 
 	UPROPERTY()
 	TArray<AActor*> ScrapsInUse;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float CurrentCoolDown;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool OnCoolDown;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		AActor* LastPlatformSpawned;
 
 protected:
 	virtual void BeginPlay() override;
@@ -109,21 +121,8 @@ private:
 	UPROPERTY()
 	FVector LastPlatformPosition;
 
-	UPROPERTY()
-	bool OnCoolDown;
-
-	UPROPERTY()
-	float CurrentCoolDown;
-
-	UPROPERTY()
-	AActor* LastPlatformSpawned;
-
-
 	UFUNCTION()
 	void SetCoolDownTimer(float DeltaTime);
-
-	UFUNCTION()
-	void ResetCoolDown();
 
 	UFUNCTION()
 	void UpdateSkywalk();
@@ -131,10 +130,8 @@ private:
 	UFUNCTION()
 	class ASkywalkPlatform* SpawnPlatform(FVector Position);
 
-	
 	UFUNCTION()
 	void FinishSkywalk();
-
 
 	float currentTime;
 	FTimerHandle secondLineTimerHandle;
