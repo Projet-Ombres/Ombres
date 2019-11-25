@@ -34,11 +34,22 @@ USkywalkComponent::USkywalkComponent()
 }
 
 
+float USkywalkComponent::GetCurrentCoolDown()
+{
+	return CurrentCoolDown;
+}
+
+bool USkywalkComponent::GetOnCooldown()
+{
+	return OnCoolDown;
+}
+
 void USkywalkComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	CurrentCoolDown = SkyWalkCoolDown;
+	OnCoolDown = false;
 
 	for (TActorIterator<AActor> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
 	{
@@ -54,7 +65,7 @@ void USkywalkComponent::BeginPlay()
 void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
 	
 	if (Active) {
 		currentTime += DeltaTime;
@@ -117,6 +128,9 @@ void USkywalkComponent::SetCoolDownTimer(float DeltaTime)
 	if (!OnCoolDown) { return; }
 
 	CurrentCoolDown += DeltaTime;
+	
+	
+
 
 	if (CurrentCoolDown > SkyWalkCoolDown) {
 		OnCoolDown = false;

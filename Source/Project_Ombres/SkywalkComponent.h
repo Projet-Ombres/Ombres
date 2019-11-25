@@ -102,14 +102,17 @@ public:
 	UPROPERTY()
 	TArray<AActor*> ScrapsInUse;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	float CurrentCoolDown;
+	UFUNCTION()
+	void SetCoolDownTimer(float DeltaTime);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool OnCoolDown;
+	UPROPERTY()
+	AActor* LastPlatformSpawned;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		AActor* LastPlatformSpawned;
+	UFUNCTION(BlueprintPure)
+	float GetCurrentCoolDown();
+
+	UFUNCTION(BlueprintPure)
+	bool GetOnCooldown();
 
 protected:
 	virtual void BeginPlay() override;
@@ -121,8 +124,7 @@ private:
 	UPROPERTY()
 	FVector LastPlatformPosition;
 
-	UFUNCTION()
-	void SetCoolDownTimer(float DeltaTime);
+	
 
 	UFUNCTION()
 	void UpdateSkywalk();
@@ -132,6 +134,14 @@ private:
 
 	UFUNCTION()
 	void FinishSkywalk();
+
+	UPROPERTY()
+	float CurrentCoolDown;
+
+	UPROPERTY()
+	bool OnCoolDown;
+
+
 
 	float currentTime;
 	FTimerHandle secondLineTimerHandle;
