@@ -2,7 +2,6 @@
 
 
 #include "SkywalkComponent.h"
-#include "Components/ActorComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
@@ -39,7 +38,6 @@ void USkywalkComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	Player->GetCharacterMovement()->MaxWalkSpeed = 500;
 	CurrentCoolDown = SkyWalkCoolDown;
 
 	for (TActorIterator<AActor> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
