@@ -111,8 +111,8 @@ void USkywalkComponent::EndSkyWalk()
 
 		Player->GetCharacterMovement()->MaxWalkSpeed = 900;
 		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-		cameraManager->ViewPitchMin = -90;
-		cameraManager->ViewPitchMax = 90;
+		cameraManager->ViewPitchMin = -89.9;
+		cameraManager->ViewPitchMax = 89.9;
 		Active = false;
 		OnCoolDown = true;
 

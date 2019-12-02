@@ -21,46 +21,46 @@ public:
 	UPROPERTY()
 	ACharacter* Player;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Tweakable")
 	float SkyWalkDuration;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tweakable")
 	float SkyWalkCoolDown;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float BringScrapDuration;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float PlaceScrapDuration;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float MaxRangeToGrabScrap;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float DistanceFromCamera;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float NoiseAmplitude;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float SpawnDistance;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	int ScrapsPerLine;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float ScrapsLevitationDuration;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float DistanceToGrabNewScraps;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float SpaceBetweenScraps;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float DistanceFromCamera2;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "NOT Tweakable")
 	float BasePlatformAngle;
 
 	UFUNCTION(BlueprintCallable)
@@ -69,22 +69,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndSkyWalk();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
 	FVector ScrapMiddlePosition;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
 	FVector ScrapRightOffset;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
 	FVector ScrapFinalMiddlePosition;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
 	FVector ScrapMiddlePosition2;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
 	FVector ScrapFinalMiddlePosition2;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "NOT Tweakable")
 	bool Active;
 
 	UFUNCTION(BlueprintCallable)
