@@ -10,7 +10,9 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"AIModule",
-				"NavigationSystem"
+				"NavigationSystem",
+				"Engine",
+				"CoreUObject"
 			]
 		}
 	],
