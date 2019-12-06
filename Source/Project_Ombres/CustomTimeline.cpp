@@ -29,7 +29,7 @@ UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObjec
 void UCustomTimeline::FinishCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref)
 {
 
-	UE_LOG(LogTemp, Log, TEXT("name : %s"), *ref->GetName());
+	//UE_LOG(LogTemp, Log, TEXT("name : %s"), *ref->GetName());
 
 
 	if (IsValid(ref)) {

@@ -5,15 +5,14 @@
 #include "NavLinkCustomComponent.h"
 
 
+
 AEditableNavLink::AEditableNavLink() {
-	left = FVector(0,-50,0);
+	left = FVector(0, -50, 0);
 	right = FVector(0, 50, 0);
 	PointLinks.Empty();
-	bSmartLinkIsRelevant = false;
 	SetSmartLinkEnabled(true);
 }
 
 void AEditableNavLink::SetSmartLinkPositions() {
 	GetSmartLinkComp()->SetLinkData(left, right, ENavLinkDirection::BothWays);
 }
-
