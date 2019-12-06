@@ -97,8 +97,9 @@ void USkywalkComponent::StartSkyWalk()
 		OnCoolDown = true;
 		LastPlatformPosition = Player->GetActorLocation();
 		currentTime = 0;
+
 		SetComponentTickEnabled(true);
-	
+		OnSkywalkStart.Broadcast();
 	}
 }
 
@@ -135,6 +136,8 @@ void USkywalkComponent::SetCoolDownTimer(float DeltaTime)
 	if (CurrentCoolDown > SkyWalkCoolDown) {
 		OnCoolDown = false;
 		SetComponentTickEnabled(false);
+
+		OnSkywalkAvailable.Broadcast();
 	}
 }
 
@@ -236,4 +239,6 @@ void USkywalkComponent::FinishSkywalk()
 	ReleaseScraps();
 	EndSkyWalk();
 }
+
+
 
