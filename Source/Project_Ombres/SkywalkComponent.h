@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "SkywalkComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPowerStateChanged);
+
 
 UCLASS(ClassGroup=(Custom),meta=(BlueprintSpawnableComponent),Blueprintable)
 class PROJECT_OMBRES_API USkywalkComponent : public UActorComponent
@@ -20,6 +22,12 @@ public:
 
 	UPROPERTY()
 	ACharacter* Player;
+
+	UPROPERTY(BlueprintAssignable)
+	FPowerStateChanged OnSkywalkStart;
+
+	UPROPERTY(BlueprintAssignable)
+	FPowerStateChanged OnSkywalkAvailable;
 
 	UPROPERTY(EditAnywhere, Category = "Tweakable")
 	float SkyWalkDuration;
