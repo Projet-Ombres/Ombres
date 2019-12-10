@@ -80,6 +80,12 @@ public:
 	UPROPERTY()
 	TArray<FVector> intermediatePositions2;
 
+	UPROPERTY()
+	TArray<FRotator> startRotations1;
+
+	UPROPERTY()
+	TArray<FRotator> startRotations2;
+
 	UFUNCTION()
 	void AddScrap(AActor* scrapToAdd, int LineIndex, int Line);
 
@@ -99,6 +105,12 @@ public:
 
 	UPROPERTY()
 	UCurveFloat* FloatCurve2;
+
+	UPROPERTY()
+	UCurveFloat* RotationCurve;
+
+	UPROPERTY()
+	TArray<UStaticMesh*> props;
 
 
 protected:

@@ -17,7 +17,6 @@ class PROJECT_OMBRES_API USkywalkComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	USkywalkComponent();
 
 	UPROPERTY()
@@ -77,9 +76,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartSkyWalk();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void StartSkywalkAnim();
-
 	UFUNCTION(BlueprintCallable)
 	void EndSkyWalk();
 
@@ -97,6 +93,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
 	FVector ScrapFinalMiddlePosition2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FRotator TargetRotation;
+
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "NOT Tweakable")
 	bool Active;
