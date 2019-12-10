@@ -118,6 +118,7 @@ void USkywalkComponent::EndSkyWalk()
 		OnCoolDown = true;
 
 		ScrapsInUse.Empty();
+		OnSkywalkEnd.Broadcast();
 	}
 	
 }
