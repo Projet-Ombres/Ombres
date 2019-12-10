@@ -29,6 +29,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FPowerStateChanged OnSkywalkAvailable;
 
+	UPROPERTY(BlueprintAssignable)
+	FPowerStateChanged OnSkywalkEnd;
+
 	UPROPERTY(EditAnywhere, Category = "Tweakable")
 	float SkyWalkDuration;
 
@@ -73,6 +76,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartSkyWalk();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartSkywalkAnim();
 
 	UFUNCTION(BlueprintCallable)
 	void EndSkyWalk();
