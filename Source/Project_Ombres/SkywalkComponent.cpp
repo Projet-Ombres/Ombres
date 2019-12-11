@@ -16,7 +16,7 @@ USkywalkComponent::USkywalkComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	SetComponentTickEnabled(false);
 
-	SkyWalkDuration= 3;
+	SkyWalkDuration= 1.2;
 	SkyWalkCoolDown = 10;
 	BringScrapDuration = 0.5;
 	PlaceScrapDuration = 0.3;
@@ -31,6 +31,10 @@ USkywalkComponent::USkywalkComponent()
 	DistanceFromCamera2 = 1400;
 	BasePlatformAngle = 15;
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
+	check(VFX.Succeeded());
+
+	SkywalkVFX = VFX.Object;
 }
 
 
@@ -98,6 +102,8 @@ void USkywalkComponent::StartSkyWalk()
 		LastPlatformPosition = Player->GetActorLocation();
 		currentTime = 0;
 
+		UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())),NAME_None, FVector(SpawnDistance,0,0), FRotator::ZeroRotator, FVector(2, 2, 2), EAttachLocation::SnapToTarget,true,EPSCPoolMethod::None);
+
 		SetComponentTickEnabled(true);
 		OnSkywalkStart.Broadcast();
 	}
@@ -158,6 +164,7 @@ void USkywalkComponent::UpdateSkywalk()
 	FVector cameraForwardVector = TargetRotation.Vector();
 	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*(ScrapsPerLine%2==0?SpaceBetweenScraps/2:SpaceBetweenScraps);
 	FVector offsetVector = FVector(0, 0, -25);
+
 
 	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector-cameraRightVector;
 	ScrapFinalMiddlePosition = playerPosition + cameraForwardVector * 350 + offsetVector - cameraRightVector;
