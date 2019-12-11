@@ -35,6 +35,9 @@ public:
 	UPROPERTY()
 	UParticleSystem* SkywalkVFX;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TilesSpawnProbability;
+
 
 	UPROPERTY(EditAnywhere, Category = "Tweakable")
 	float SkyWalkDuration;
