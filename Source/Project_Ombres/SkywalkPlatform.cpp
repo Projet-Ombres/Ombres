@@ -337,7 +337,18 @@ void ASkywalkPlatform::MoveClosestScrap(int LineIndex, int Line)
 		meshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 		meshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
 		meshComp->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel18);
-		meshComp->SetStaticMesh(props[FMath::RandRange(0,props.Num() - 1)]);
+
+		float rand = FMath::FRand();
+
+		if (rand<=skywalkComponent->TilesSpawnProbability){
+			//80% de chances de faire pop des tuiles
+			meshComp->SetStaticMesh(props[FMath::RandRange(5, props.Num() - 1)]);
+		}
+		else {
+			meshComp->SetStaticMesh(props[FMath::RandRange(0,4)]);
+		}
+
+		
 
 		//UE_LOG(LogTemp, Warning, TEXT("object type : %s"),*GETENUMSTRING("ECollisionChannel", meshComp->GetCollisionObjectType()));
 	}

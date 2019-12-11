@@ -24,12 +24,13 @@ USkywalkComponent::USkywalkComponent()
 	DistanceFromCamera = 700;
 	NoiseAmplitude = 100;
 	SpawnDistance = 400;
-	ScrapsPerLine = 2;
+	ScrapsPerLine = 3;
 	ScrapsLevitationDuration = 2;
-	DistanceToGrabNewScraps = 150;
-	SpaceBetweenScraps = 125;
+	DistanceToGrabNewScraps = 125;
+	SpaceBetweenScraps = 100;
 	DistanceFromCamera2 = 1400;
 	BasePlatformAngle = 15;
+	TilesSpawnProbability = 0.8;
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
 	check(VFX.Succeeded());
