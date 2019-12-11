@@ -100,8 +100,6 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 			percent = progression1 / BringScrapDuration;
 			for (int i = 0, l = activeScraps1.Num(); i < l; i++) {
 				activeScraps1[i]->SetActorLocation(UKismetMathLibrary::VLerp(startPositions1[i], CalculateScrapTargetPosition(i, 0),FloatCurve1->GetFloatValue(percent)));
-				
-				UE_LOG(LogTemp, Warning, TEXT("rotation : %s"), *UKismetMathLibrary::RLerp(startRotations1[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression1 / (BringScrapDuration + PlaceScrapDuration)), true).ToString());
 				activeScraps1[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations1[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression1/(BringScrapDuration+PlaceScrapDuration)),true));
 			}
 		}
@@ -169,6 +167,8 @@ void ASkywalkPlatform::ResetPhysics1()
 	for (int i = 0, l = levitatingScraps1.Num(); i < l; i++) {
 		UStaticMeshComponent* smc = Cast<UStaticMeshComponent>(levitatingScraps1[i]->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 		smc->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 		smc->SetSimulatePhysics(true);
 		smc->SetEnableGravity(true);
 	}
@@ -182,6 +182,8 @@ void ASkywalkPlatform::ResetPhysics2()
 	for (int i = 0, l = levitatingScraps2.Num(); i < l; i++) {
 		UStaticMeshComponent* smc = Cast<UStaticMeshComponent>(levitatingScraps2[i]->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 		smc->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 		smc->SetSimulatePhysics(true);
 		smc->SetEnableGravity(true);
 	}
@@ -314,8 +316,9 @@ void ASkywalkPlatform::MoveClosestScrap(int LineIndex, int Line)
 		FVector pos = cameraPosition + (cameraRightVector * (FMath::Rand() / RAND_MAX * 2 - 1) * SpawnDistance);
 
 		FVector targetPosition = FVector(pos.X, pos.Y, skywalkComponent->Player->GetActorLocation().Z - 150);
+		FRotator targetRotation = FRotator(FMath::FRandRange(0, 180), FMath::FRandRange(0, 180), FMath::FRandRange(0, 180));
 
-		NearestScrap = GetWorld()->SpawnActor(AStaticMeshActor::StaticClass(), &targetPosition);
+		NearestScrap = GetWorld()->SpawnActor(AStaticMeshActor::StaticClass(), &targetPosition, &targetRotation);
 		AStaticMeshActor* staticMeshActor = (Cast<AStaticMeshActor>(NearestScrap));
 		staticMeshActor->SetMobility(EComponentMobility::Movable);
 		UStaticMeshComponent* meshComp = staticMeshActor->GetStaticMeshComponent();
@@ -326,8 +329,11 @@ void ASkywalkPlatform::MoveClosestScrap(int LineIndex, int Line)
 		meshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 		meshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 		meshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
-
+		meshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
+		meshComp->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel18);
 		meshComp->SetStaticMesh(props[FMath::RandRange(0,props.Num() - 1)]);
+
+		//UE_LOG(LogTemp, Warning, TEXT("object type : %s"),*GETENUMSTRING("ECollisionChannel", meshComp->GetCollisionObjectType()));
 	}
 	AddScrap(NearestScrap, LineIndex, Line);
 }

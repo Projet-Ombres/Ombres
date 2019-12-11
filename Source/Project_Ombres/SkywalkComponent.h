@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "MeshPassProcessor.h"
 #include "GameFramework/Character.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "SkywalkComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPowerStateChanged);
@@ -30,6 +31,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FPowerStateChanged OnSkywalkEnd;
+
+	UPROPERTY()
+	UParticleSystem* SkywalkVFX;
+
 
 	UPROPERTY(EditAnywhere, Category = "Tweakable")
 	float SkyWalkDuration;
