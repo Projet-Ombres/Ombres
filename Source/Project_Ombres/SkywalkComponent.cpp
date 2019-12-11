@@ -30,7 +30,7 @@ USkywalkComponent::USkywalkComponent()
 	SpaceBetweenScraps = 100;
 	DistanceFromCamera2 = 1400;
 	BasePlatformAngle = 15;
-	TilesSpawnProbability = 0.8;
+	TilesSpawnProbability = 0.9;
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
 	check(VFX.Succeeded());
