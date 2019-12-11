@@ -50,14 +50,20 @@ ASkywalkPlatform::ASkywalkPlatform()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Prop3(TEXT("/Game/_ART/StaticMesh/SM_Small_Signboard"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Prop4(TEXT("/Game/_ART/StaticMesh/SM_Wall_Light_1"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Prop5(TEXT("/Game/_ART/StaticMesh/SM_Wall_Light_2"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Prop6(TEXT("/Game/_ART/StaticMesh/SM_RoofSlides_SM_RoofSlides_01"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Prop7(TEXT("/Game/_ART/StaticMesh/SM_RoofSlides_SM_RoofSlides_02"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Prop8(TEXT("/Game/_ART/StaticMesh/SM_RoofSlides_SM_RoofSlides_03"));
 
 
-	props.SetNum(5);
+	props.SetNum(8);
 	props[0]=Prop1.Object;
 	props[1]=Prop2.Object;
 	props[2]=Prop3.Object;
 	props[3]=Prop4.Object;
 	props[4]=Prop5.Object;
+	props[5] = Prop6.Object;
+	props[6] = Prop7.Object;
+	props[7] = Prop8.Object;
 }
 
 
