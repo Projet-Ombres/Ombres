@@ -27,7 +27,7 @@ USkywalkComponent::USkywalkComponent()
 	ScrapsPerLine = 2;
 	ScrapsLevitationDuration = 2;
 	DistanceToGrabNewScraps = 150;
-	SpaceBetweenScraps = 100;
+	SpaceBetweenScraps = 125;
 	DistanceFromCamera2 = 1400;
 	BasePlatformAngle = 15;
 
@@ -102,7 +102,7 @@ void USkywalkComponent::StartSkyWalk()
 		LastPlatformPosition = Player->GetActorLocation();
 		currentTime = 0;
 
-		UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())),NAME_None, FVector(SpawnDistance,0,0), FRotator::ZeroRotator, FVector(2, 2, 2), EAttachLocation::SnapToTarget,true,EPSCPoolMethod::None);
+		UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())),NAME_None, FVector(SpawnDistance,0,-50), FRotator::ZeroRotator, FVector(2, 2, 2), EAttachLocation::SnapToTarget,true,EPSCPoolMethod::None);
 
 		SetComponentTickEnabled(true);
 		OnSkywalkStart.Broadcast();
