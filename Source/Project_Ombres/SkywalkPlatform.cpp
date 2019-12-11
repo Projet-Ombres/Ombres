@@ -305,6 +305,7 @@ void ASkywalkPlatform::MoveClosestScrap(int LineIndex, int Line)
 	if (IsValid(NearestScrap)) {
 		UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(NearestScrap->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 		if (IsValid(staticMeshComponent)) {
+			staticMeshComponent->SetMobility(EComponentMobility::Movable);
 			staticMeshComponent->SetSimulatePhysics(false);
 			if (staticMeshComponent!=NearestScrap->GetRootComponent() && !staticMeshComponent->IsAttachedTo(NearestScrap->GetRootComponent())) {
 				staticMeshComponent->AttachToComponent(NearestScrap->GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true));
