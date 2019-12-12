@@ -7,6 +7,10 @@
 #include "Curves/CurveFloat.h"
 #include "SkywalkPlatform.generated.h"
 
+#define GETENUMSTRING(etype, evalue) ( (FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true) != nullptr) ? FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true)->GetEnumName((int32)evalue) : FString("Invalid - are you sure enum uses UENUM() macro?") )
+
+
+
 UCLASS()
 class PROJECT_OMBRES_API ASkywalkPlatform : public AActor
 {
@@ -80,6 +84,12 @@ public:
 	UPROPERTY()
 	TArray<FVector> intermediatePositions2;
 
+	UPROPERTY()
+	TArray<FRotator> startRotations1;
+
+	UPROPERTY()
+	TArray<FRotator> startRotations2;
+
 	UFUNCTION()
 	void AddScrap(AActor* scrapToAdd, int LineIndex, int Line);
 
@@ -99,6 +109,12 @@ public:
 
 	UPROPERTY()
 	UCurveFloat* FloatCurve2;
+
+	UPROPERTY()
+	UCurveFloat* RotationCurve;
+
+	UPROPERTY()
+	TArray<UStaticMesh*> props;
 
 
 protected:

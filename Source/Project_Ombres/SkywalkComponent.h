@@ -6,7 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "MeshPassProcessor.h"
 #include "GameFramework/Character.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "SkywalkComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPowerStateChanged);
 
 
 UCLASS(ClassGroup=(Custom),meta=(BlueprintSpawnableComponent),Blueprintable)
@@ -15,11 +18,29 @@ class PROJECT_OMBRES_API USkywalkComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	USkywalkComponent();
 
 	UPROPERTY()
 	ACharacter* Player;
+
+	UPROPERTY(BlueprintAssignable)
+	FPowerStateChanged OnSkywalkStart;
+
+	UPROPERTY(BlueprintAssignable)
+	FPowerStateChanged OnSkywalkAvailable;
+
+	UPROPERTY(BlueprintAssignable)
+	FPowerStateChanged OnSkywalkEnd;
+
+	UPROPERTY()
+	UParticleSystem* SkywalkVFX;
+
+	UPROPERTY()
+	UParticleSystemComponent* spawnedVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TilesSpawnProbability;
+
 
 	UPROPERTY(EditAnywhere, Category = "Tweakable")
 	float SkyWalkDuration;
@@ -83,6 +104,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
 	FVector ScrapFinalMiddlePosition2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FRotator TargetRotation;
+
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "NOT Tweakable")
 	bool Active;
