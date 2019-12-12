@@ -103,7 +103,7 @@ void USkywalkComponent::StartSkyWalk()
 		LastPlatformPosition = Player->GetActorLocation();
 		currentTime = 0;
 
-		UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())),NAME_None, FVector(SpawnDistance,0,-50), FRotator(25,0,0), FVector(1.5, 1.5, 1.5), EAttachLocation::SnapToTarget,true,EPSCPoolMethod::None);
+		spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())),NAME_None, FVector(SpawnDistance,0,-50), FRotator(25,0,0), FVector(1.5, 1.5, 1.5), EAttachLocation::SnapToTarget,true,EPSCPoolMethod::None);
 
 		SetComponentTickEnabled(true);
 		OnSkywalkStart.Broadcast();
@@ -125,6 +125,8 @@ void USkywalkComponent::EndSkyWalk()
 		OnCoolDown = true;
 
 		ScrapsInUse.Empty();
+		spawnedVFX->DestroyComponent();
+		
 		OnSkywalkEnd.Broadcast();
 	}
 	

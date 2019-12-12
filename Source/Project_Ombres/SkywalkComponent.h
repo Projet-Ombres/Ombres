@@ -35,6 +35,9 @@ public:
 	UPROPERTY()
 	UParticleSystem* SkywalkVFX;
 
+	UPROPERTY()
+	UParticleSystemComponent* spawnedVFX;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TilesSpawnProbability;
 
