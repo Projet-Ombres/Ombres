@@ -117,7 +117,7 @@ void USkywalkComponent::EndSkyWalk()
 		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0, 0, -75));
 
 
-		Player->GetCharacterMovement()->MaxWalkSpeed = 900;
+		Player->GetCharacterMovement()->MaxWalkSpeed = 765;
 		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 		cameraManager->ViewPitchMin = -89.9;
 		cameraManager->ViewPitchMax = 89.9;
