@@ -139,6 +139,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool GetOnCooldown();
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool SpellEnabled;
+
 protected:
 	virtual void BeginPlay() override;
 

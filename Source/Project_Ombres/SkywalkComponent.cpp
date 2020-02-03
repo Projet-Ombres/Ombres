@@ -31,6 +31,7 @@ USkywalkComponent::USkywalkComponent()
 	DistanceFromCamera2 = 1400;
 	BasePlatformAngle = 15;
 	TilesSpawnProbability = 0.9;
+	SpellEnabled = true;
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
 	check(VFX.Succeeded());
@@ -91,23 +92,28 @@ void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void USkywalkComponent::StartSkyWalk()
 {
-	if (!OnCoolDown) {
-		Active = true;
-		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-		cameraManager->ViewPitchMin = -45;
-		cameraManager->ViewPitchMax = 45;
-		Player->GetCharacterMovement()->MaxWalkSpeed = 500;
 
-		CurrentCoolDown = 0;
-		OnCoolDown = true;
-		LastPlatformPosition = Player->GetActorLocation();
-		currentTime = 0;
+	if (SpellEnabled) {
+		if (!OnCoolDown) {
+			Active = true;
+			APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+			cameraManager->ViewPitchMin = -45;
+			cameraManager->ViewPitchMax = 45;
+			Player->GetCharacterMovement()->MaxWalkSpeed = 500;
 
-		spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())),NAME_None, FVector(SpawnDistance,0,-50), FRotator(25,0,0), FVector(1.5, 1.5, 1.5), EAttachLocation::SnapToTarget,true,EPSCPoolMethod::None);
+			CurrentCoolDown = 0;
+			OnCoolDown = true;
+			LastPlatformPosition = Player->GetActorLocation();
+			currentTime = 0;
 
-		SetComponentTickEnabled(true);
-		OnSkywalkStart.Broadcast();
+			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())), NAME_None, FVector(SpawnDistance, 0, -50), FRotator(25, 0, 0), FVector(1.5, 1.5, 1.5), EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
+
+			SetComponentTickEnabled(true);
+			OnSkywalkStart.Broadcast();
+		}
 	}
+
+	
 }
 
 void USkywalkComponent::EndSkyWalk()
