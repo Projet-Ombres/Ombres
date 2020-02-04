@@ -16,6 +16,7 @@ USkywalkComponent::USkywalkComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetComponentTickEnabled(false);
+	
 
 	SkyWalkDuration= 1.2;
 	SkyWalkCoolDown = 10;
@@ -38,9 +39,21 @@ USkywalkComponent::USkywalkComponent()
 	VFXRotation = FRotator(0, 0, -90);
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
-	check(VFX.Succeeded());
+	if (VFX.Succeeded()) {
+		SkywalkVFX = VFX.Object;
+	}
 
-	SkywalkVFX = VFX.Object;
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> staticMesh(TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube'"));
+	if (staticMesh.Succeeded()) {
+		ghostMesh = staticMesh.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> mat(TEXT("Material'/Game/Assets/SM/Cristal/Cristal_M.Cristal_M'"));
+	if (mat.Succeeded()) {
+		ghostMaterial = mat.Object;
+	}
+
+
 }
 
 
@@ -113,6 +126,17 @@ void USkywalkComponent::StartSkyWalk()
 			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(0, 0, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
 
 			SetComponentTickEnabled(true);
+
+
+			//spawn le fantôme
+			GhostStaticMeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(LastPlatformPosition, cameraManager->GetCameraRotation());
+			GhostStaticMeshActor->SetActorScale3D(FVector(5, 3, 0.5f));
+			GhostStaticMeshActor->SetMobility(EComponentMobility::Movable);
+			GhostStaticMeshActor->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
+			GhostStaticMeshActor->GetStaticMeshComponent()->SetStaticMesh(ghostMesh);
+			GhostStaticMeshActor->GetStaticMeshComponent()->SetMaterial(0, ghostMaterial);
+			GhostStaticMeshActor->SetActorEnableCollision(false);
+
 			OnSkywalkStart.Broadcast();
 		}
 	}
@@ -136,6 +160,9 @@ void USkywalkComponent::EndSkyWalk()
 
 		ScrapsInUse.Empty();
 		spawnedVFX->DestroyComponent();
+
+		//on détruit le fantôme à la fin du skywalk
+		GhostStaticMeshActor->Destroy();
 		
 		OnSkywalkEnd.Broadcast();
 	}
@@ -168,16 +195,24 @@ void USkywalkComponent::ResetCoolDown()
 
 void USkywalkComponent::UpdateSkywalk()
 {
+
+	float completion = currentTime / SkyWalkDuration;
+	UE_LOG(LogTemp, Warning, TEXT("completion : %f"), completion);
+
+
 	//UE_LOG(LogTemp, Warning, TEXT("Update skywalk"));
 	Player->GetCharacterMovement()->MaxWalkSpeed = 500;
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector playerPosition = Player->GetActorLocation();
+	float speed = Player->GetVelocity().Size();
+
 	FVector cameraPosition = cameraManager->GetCameraLocation();
 	TargetRotation = cameraManager->GetCameraRotation();
 	FVector cameraForwardVector = TargetRotation.Vector();
 	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*(ScrapsPerLine%2==0?SpaceBetweenScraps/2:SpaceBetweenScraps);
 	FVector offsetVector = FVector(0, 0, -25);
-
+	FVector ghostPosition = playerPosition + FVector(0, 0, -100) + cameraForwardVector * (500+300*(1-completion)*speed/760);
+	FVector ghostScale = FVector(7 * (1 - completion) * speed/760, 3, 0.5f);
 
 	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector-cameraRightVector;
 	ScrapFinalMiddlePosition = playerPosition + cameraForwardVector * 350 + offsetVector - cameraRightVector;
@@ -185,6 +220,10 @@ void USkywalkComponent::UpdateSkywalk()
 	ScrapMiddlePosition = cameraPosition + cameraForwardVector * DistanceFromCamera- cameraRightVector;
 	ScrapRightOffset = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * SpaceBetweenScraps;
 
+	GhostStaticMeshActor->SetActorLocation(ghostPosition);
+	GhostStaticMeshActor->SetActorRotation(TargetRotation);
+	GhostStaticMeshActor->SetActorScale3D(ghostScale);
+	
 
 	if ((LastPlatformPosition - playerPosition).Size()>DistanceToGrabNewScraps) {
 		LastPlatformPosition = playerPosition;
