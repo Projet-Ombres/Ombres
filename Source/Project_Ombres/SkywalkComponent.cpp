@@ -8,7 +8,6 @@
 #include "Engine/StaticMesh.h"
 #include "SkywalkPlatform.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "EngineUtils.h"
 
 
@@ -34,9 +33,6 @@ USkywalkComponent::USkywalkComponent()
 	BasePlatformAngle = 15;
 	TilesSpawnProbability = 0.9;
 	SpellEnabled = true;
-
-	VFXScale = FVector(0.2f, 0.2f, 0.2f);
-	VFXRotation = FRotator(0, 0, -90);
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
 	if (VFX.Succeeded()) {
@@ -123,7 +119,7 @@ void USkywalkComponent::StartSkyWalk()
 			LastPlatformPosition = Player->GetActorLocation();
 			currentTime = 0;
 
-			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(0, 0, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
+			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())), NAME_None, FVector(SpawnDistance, 0, -50), FRotator(25, 0, 0), FVector(1.5, 1.5, 1.5), EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
 
 			SetComponentTickEnabled(true);
 
