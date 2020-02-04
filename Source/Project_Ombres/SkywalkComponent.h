@@ -142,6 +142,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool SpellEnabled;
 
+	UPROPERTY(EditAnywhere)
+		FVector VFXScale;
+
+	UPROPERTY(EditAnywhere)
+		FRotator VFXRotation;
+
 protected:
 	virtual void BeginPlay() override;
 
