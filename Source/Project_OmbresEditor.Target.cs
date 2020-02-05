@@ -9,6 +9,6 @@ public class Project_OmbresEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange( new string[] { "Project_Ombres" } );
+		ExtraModuleNames.AddRange( new string[] { "Project_Ombres","LoadingScreen" } );
 	}
 }

@@ -193,8 +193,6 @@ void USkywalkComponent::UpdateSkywalk()
 {
 
 	float completion = currentTime / SkyWalkDuration;
-	UE_LOG(LogTemp, Warning, TEXT("completion : %f"), completion);
-
 
 	//UE_LOG(LogTemp, Warning, TEXT("Update skywalk"));
 	Player->GetCharacterMovement()->MaxWalkSpeed = 500;
