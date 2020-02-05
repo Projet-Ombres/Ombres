@@ -12,13 +12,10 @@
 				"AIModule",
 				"NavigationSystem",
 				"Engine",
-				"CoreUObject"
+				"CoreUObject",
+				"Slate",
+				"SlateCore"
 			]
-		},
-		{
-			"Name":"LoadingScreen",
-			"Type":"ClientOnly",
-			"LoadingPhase":"PreLoadingScreen"
 		}
 	],
 	"Plugins": [

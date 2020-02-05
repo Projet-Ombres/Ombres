@@ -15,6 +15,20 @@ class PROJECT_OMBRES_API UOmbresGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 protected:
-	virtual void LoadComplete(const float LoadTime, const FString& MapName) override;
+
+	virtual void Init() override;
+
+	UFUNCTION()
+		virtual void BeginLoadingScreen(const FString& MapName);
+
+	UFUNCTION()
+		virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+
+private:
+	UPROPERTY()
+		FTimerHandle timerHandle;
+
+	UFUNCTION()
+		void CheckIsLoadingSubLevels();
 	
 };

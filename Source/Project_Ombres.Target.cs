@@ -9,6 +9,6 @@ public class Project_OmbresTarget : TargetRules
 	{
 		Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "Project_Ombres","LoadingScreen" } );
+		ExtraModuleNames.AddRange( new string[] { "Project_Ombres" } );
 	}
 }
