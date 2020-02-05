@@ -29,11 +29,13 @@ void FLoadingScreenModule::StartInGameLoadingScreen(bool bPlayUntilStopped, floa
 	screen.MinimumLoadingScreenDisplayTime = 5;
 	//screen.WidgetLoadingScreen = SNew(SStandardSlateWidget)
 	GetMoviePlayer()->SetupLoadingScreen(screen);
+	UE_LOG(LoadingScreen, Warning, TEXT("LOADING STARTED"));
 }
 
 void FLoadingScreenModule::StopInGameLoadingScreen() 
 {
 	GetMoviePlayer()->StopMovie();
+	UE_LOG(LoadingScreen, Warning, TEXT("LOADING FINISHED"));
 }
 
 
