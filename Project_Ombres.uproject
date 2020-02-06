@@ -12,9 +12,7 @@
 				"AIModule",
 				"NavigationSystem",
 				"Engine",
-				"CoreUObject",
-				"Slate",
-				"SlateCore"
+				"CoreUObject"
 			]
 		}
 	],

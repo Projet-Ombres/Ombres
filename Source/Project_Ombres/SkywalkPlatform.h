@@ -53,6 +53,7 @@ public:
 	UPROPERTY()
 	float progression2;
 
+
 	UFUNCTION()
 	void SpawnFirstLine();
 
@@ -114,8 +115,6 @@ public:
 
 	UPROPERTY()
 	TArray<UStaticMesh*> props;
-
-	
 
 
 protected:
