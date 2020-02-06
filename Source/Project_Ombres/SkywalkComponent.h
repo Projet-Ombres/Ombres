@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "MeshPassProcessor.h"
 #include "GameFramework/Character.h"
+#include "Engine/StaticMeshActor.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "SkywalkComponent.generated.h"
 
@@ -142,6 +143,23 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool SpellEnabled;
 
+	UPROPERTY(EditAnywhere)
+		FVector VFXScale;
+
+	UPROPERTY(EditAnywhere)
+		FRotator VFXRotation;
+	
+
+	UPROPERTY(EditAnywhere)
+		UStaticMesh* ghostMesh;
+
+	UPROPERTY(EditAnywhere)
+		UMaterialInterface* ghostMaterial;
+
+	UPROPERTY()
+		AStaticMeshActor* GhostStaticMeshActor;
+
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -168,6 +186,7 @@ private:
 
 	UPROPERTY()
 	bool OnCoolDown;
+
 
 
 
