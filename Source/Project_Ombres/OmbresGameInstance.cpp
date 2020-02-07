@@ -22,7 +22,7 @@ void UOmbresGameInstance::BeginLoadingScreen(const FString& InMapName)
 		FLoadingScreenAttributes LoadingScreen;
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
 		LoadingScreen.bMoviesAreSkippable = true;
-		LoadingScreen.WidgetLoadingScreen = SNew(SLoadingScreenWidget);
+		LoadingScreen.WidgetLoadingScreen = FLoadingScreenAttributes::NewTestLoadingScreenWidget();
 		LoadingScreen.bWaitForManualStop = false;
 		
 
