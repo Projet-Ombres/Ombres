@@ -22,5 +22,15 @@ public:
 	static void GenerateLevelArchitectureLOD(UStaticMesh* staticMesh) {
 		staticMesh->SetLODGroup(FName(TEXT("LevelArchitecture")));
 	}
+
+	UFUNCTION(BlueprintCallable)
+	static UChildActorComponent* AddChildActor(AActor* target) {
+		UChildActorComponent* actorComponent = NewObject<UChildActorComponent>(target, UChildActorComponent::StaticClass(), FName("ChildActorComponent"));
+		actorComponent->SetChildActorClass(target->GetClass());
+		actorComponent->CreateChildActor();
+		actorComponent->SetupAttachment(target->GetRootComponent());
+		actorComponent->RegisterComponent();
+		return actorComponent;
+	}
 #endif
 };
