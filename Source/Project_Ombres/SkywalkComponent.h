@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "MeshPassProcessor.h"
 #include "GameFramework/Character.h"
-#include "Engine/StaticMeshActor.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "SkywalkComponent.generated.h"
 
@@ -148,8 +147,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		FRotator VFXRotation;
-	
-
 
 protected:
 	virtual void BeginPlay() override;
@@ -177,7 +174,6 @@ private:
 
 	UPROPERTY()
 	bool OnCoolDown;
-
 
 
 

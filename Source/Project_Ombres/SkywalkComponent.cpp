@@ -8,15 +8,14 @@
 #include "Engine/StaticMesh.h"
 #include "SkywalkPlatform.h"
 #include "Kismet/GameplayStatics.h"
-#include "EngineUtils.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "EngineUtils.h"
 
 
 USkywalkComponent::USkywalkComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetComponentTickEnabled(false);
-	
 
 	SkyWalkDuration= 1.2;
 	SkyWalkCoolDown = 10;
@@ -39,11 +38,9 @@ USkywalkComponent::USkywalkComponent()
 	VFXRotation = FRotator(0, 0, -90);
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
-	if (VFX.Succeeded()) {
-		SkywalkVFX = VFX.Object;
-	}
+	check(VFX.Succeeded());
 
-
+	SkywalkVFX = VFX.Object;
 }
 
 
@@ -114,10 +111,8 @@ void USkywalkComponent::StartSkyWalk()
 			currentTime = 0;
 
 			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(0, 0, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
+
 			SetComponentTickEnabled(true);
-
-
-
 			OnSkywalkStart.Broadcast();
 		}
 	}
@@ -141,7 +136,6 @@ void USkywalkComponent::EndSkyWalk()
 
 		ScrapsInUse.Empty();
 		spawnedVFX->DestroyComponent();
-
 		
 		OnSkywalkEnd.Broadcast();
 	}
@@ -174,29 +168,23 @@ void USkywalkComponent::ResetCoolDown()
 
 void USkywalkComponent::UpdateSkywalk()
 {
-
-	float completion = currentTime / SkyWalkDuration;
-
 	//UE_LOG(LogTemp, Warning, TEXT("Update skywalk"));
 	Player->GetCharacterMovement()->MaxWalkSpeed = 500;
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector playerPosition = Player->GetActorLocation();
-	float speed = Player->GetVelocity().Size();
-
 	FVector cameraPosition = cameraManager->GetCameraLocation();
 	TargetRotation = cameraManager->GetCameraRotation();
 	FVector cameraForwardVector = TargetRotation.Vector();
 	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*(ScrapsPerLine%2==0?SpaceBetweenScraps/2:SpaceBetweenScraps);
 	FVector offsetVector = FVector(0, 0, -25);
-	FVector ghostPosition = playerPosition + FVector(0, 0, -100) + cameraForwardVector * (500+300*(1-completion)*speed/760);
-	FVector ghostScale = FVector(7 * (1 - completion) * speed/760, 3, 0.5f);
+
 
 	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector-cameraRightVector;
 	ScrapFinalMiddlePosition = playerPosition + cameraForwardVector * 350 + offsetVector - cameraRightVector;
 	ScrapMiddlePosition2 = cameraPosition + cameraForwardVector * DistanceFromCamera2- cameraRightVector;
 	ScrapMiddlePosition = cameraPosition + cameraForwardVector * DistanceFromCamera- cameraRightVector;
 	ScrapRightOffset = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * SpaceBetweenScraps;
-	
+
 
 	if ((LastPlatformPosition - playerPosition).Size()>DistanceToGrabNewScraps) {
 		LastPlatformPosition = playerPosition;
