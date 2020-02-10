@@ -9,6 +9,7 @@
 #include "SkywalkPlatform.h"
 #include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 USkywalkComponent::USkywalkComponent()
@@ -34,19 +35,12 @@ USkywalkComponent::USkywalkComponent()
 	TilesSpawnProbability = 0.9;
 	SpellEnabled = true;
 
+	VFXScale = FVector(0.2f, 0.2f, 0.2f);
+	VFXRotation = FRotator(0, 0, -90);
+
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
 	if (VFX.Succeeded()) {
 		SkywalkVFX = VFX.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> staticMesh(TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube'"));
-	if (staticMesh.Succeeded()) {
-		ghostMesh = staticMesh.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> mat(TEXT("Material'/Game/Assets/SM/Cristal/Cristal_M.Cristal_M'"));
-	if (mat.Succeeded()) {
-		ghostMaterial = mat.Object;
 	}
 
 
@@ -119,19 +113,10 @@ void USkywalkComponent::StartSkyWalk()
 			LastPlatformPosition = Player->GetActorLocation();
 			currentTime = 0;
 
-			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())), NAME_None, FVector(SpawnDistance, 0, -50), FRotator(25, 0, 0), FVector(1.5, 1.5, 1.5), EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
-
+			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(0, 0, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
 			SetComponentTickEnabled(true);
 
 
-			//spawn le fantôme
-			GhostStaticMeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(LastPlatformPosition, cameraManager->GetCameraRotation());
-			GhostStaticMeshActor->SetActorScale3D(FVector(5, 3, 0.5f));
-			GhostStaticMeshActor->SetMobility(EComponentMobility::Movable);
-			GhostStaticMeshActor->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
-			GhostStaticMeshActor->GetStaticMeshComponent()->SetStaticMesh(ghostMesh);
-			GhostStaticMeshActor->GetStaticMeshComponent()->SetMaterial(0, ghostMaterial);
-			GhostStaticMeshActor->SetActorEnableCollision(false);
 
 			OnSkywalkStart.Broadcast();
 		}
@@ -157,8 +142,6 @@ void USkywalkComponent::EndSkyWalk()
 		ScrapsInUse.Empty();
 		spawnedVFX->DestroyComponent();
 
-		//on détruit le fantôme à la fin du skywalk
-		GhostStaticMeshActor->Destroy();
 		
 		OnSkywalkEnd.Broadcast();
 	}
@@ -213,10 +196,6 @@ void USkywalkComponent::UpdateSkywalk()
 	ScrapMiddlePosition2 = cameraPosition + cameraForwardVector * DistanceFromCamera2- cameraRightVector;
 	ScrapMiddlePosition = cameraPosition + cameraForwardVector * DistanceFromCamera- cameraRightVector;
 	ScrapRightOffset = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * SpaceBetweenScraps;
-
-	GhostStaticMeshActor->SetActorLocation(ghostPosition);
-	GhostStaticMeshActor->SetActorRotation(TargetRotation);
-	GhostStaticMeshActor->SetActorScale3D(ghostScale);
 	
 
 	if ((LastPlatformPosition - playerPosition).Size()>DistanceToGrabNewScraps) {
