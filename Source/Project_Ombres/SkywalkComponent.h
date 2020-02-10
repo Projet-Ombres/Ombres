@@ -150,15 +150,6 @@ public:
 		FRotator VFXRotation;
 	
 
-	UPROPERTY(EditAnywhere)
-		UStaticMesh* ghostMesh;
-
-	UPROPERTY(EditAnywhere)
-		UMaterialInterface* ghostMaterial;
-
-	UPROPERTY()
-		AStaticMeshActor* GhostStaticMeshActor;
-
 
 protected:
 	virtual void BeginPlay() override;
