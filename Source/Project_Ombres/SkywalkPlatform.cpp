@@ -85,6 +85,7 @@ void ASkywalkPlatform::AddScrap(AActor* scrapToAdd, int LineIndex, int Line)
 		startPositions1[LineIndex] = scrapToAdd->GetActorLocation();
 		startRotations1[LineIndex] = scrapToAdd->GetActorRotation();
 		AStaticMeshActor* preview = GetWorld()->SpawnActor<AStaticMeshActor>();
+		preview->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
 		preview->GetStaticMeshComponent()->SetStaticMesh(Cast<UStaticMeshComponent>(scrapToAdd->GetComponentByClass(UStaticMeshComponent::StaticClass()))->GetStaticMesh());
 		preview->GetStaticMeshComponent()->SetMaterial(0,skywalkComponent->PreviewMaterial);
 		previews1[LineIndex] = preview;
@@ -96,6 +97,7 @@ void ASkywalkPlatform::AddScrap(AActor* scrapToAdd, int LineIndex, int Line)
 		startPositions2[LineIndex] = scrapToAdd->GetActorLocation();
 		startRotations2[LineIndex] = scrapToAdd->GetActorRotation();
 		AStaticMeshActor* preview = GetWorld()->SpawnActor<AStaticMeshActor>();
+		preview->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
 		preview->GetStaticMeshComponent()->SetStaticMesh(Cast<UStaticMeshComponent>(scrapToAdd->GetComponentByClass(UStaticMeshComponent::StaticClass()))->GetStaticMesh());
 		preview->GetStaticMeshComponent()->SetMaterial(0, skywalkComponent->PreviewMaterial);
 		previews2[LineIndex] = preview;
@@ -118,6 +120,7 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 				activeScraps1[i]->SetActorLocation(UKismetMathLibrary::VLerp(startPositions1[i], targetPosition,FloatCurve1->GetFloatValue(percent)));
 				activeScraps1[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations1[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression1/(BringScrapDuration+PlaceScrapDuration)),true));
 				previews1[i]->SetActorLocation(CalculateScrapFinalPosition(i, 0));
+				previews1[i]->SetActorRotation(skywalkComponent->TargetRotation);
 			}
 		}
 		else {
@@ -128,6 +131,7 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 					activeScraps1[i]->SetActorLocation(UKismetMathLibrary::VLerp(intermediatePositions1[i],targetPosition , FloatCurve2->GetFloatValue(percent)));
 					activeScraps1[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations1[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression1 / (BringScrapDuration + PlaceScrapDuration)), true));
 					previews1[i]->SetActorLocation(targetPosition);
+					previews1[i]->SetActorRotation(skywalkComponent->TargetRotation);
 				}
 			}
 			else {
@@ -158,6 +162,7 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 				activeScraps2[i]->SetActorLocation(UKismetMathLibrary::VLerp(startPositions2[i], targetPosition, FloatCurve1->GetFloatValue(percent)));
 				activeScraps2[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations2[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression2 / (BringScrapDuration + PlaceScrapDuration)), true));
 				previews2[i]->SetActorLocation(CalculateScrapFinalPosition(i, 1));
+				previews2[i]->SetActorRotation(skywalkComponent->TargetRotation);
 			}
 		}
 		else {
@@ -168,6 +173,7 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 					activeScraps2[i]->SetActorLocation(UKismetMathLibrary::VLerp(intermediatePositions2[i], CalculateScrapFinalPosition(i, 1), FloatCurve2->GetFloatValue(percent)));
 					activeScraps2[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations2[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression2 / (BringScrapDuration + PlaceScrapDuration)), true));
 					previews2[i]->SetActorLocation(targetPosition);
+					previews2[i]->SetActorRotation(skywalkComponent->TargetRotation);
 				}
 			}
 			else {

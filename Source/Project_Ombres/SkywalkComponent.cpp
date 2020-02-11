@@ -126,11 +126,13 @@ void USkywalkComponent::StartSkyWalk()
 void USkywalkComponent::EndSkyWalk()
 {
 	if (Active) {
-		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0, 0, -100));
-		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0, 0, -120));
+
+		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+		FVector cameraForwardVector = cameraManager->GetCameraRotation().Vector();
+		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0, 0, 50) + cameraForwardVector * (-20));
+		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0, 0, 50) + cameraForwardVector * (-20));
 
 		Player->GetCharacterMovement()->MaxWalkSpeed = 765;
-		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 		cameraManager->ViewPitchMin = -89.9;
 		cameraManager->ViewPitchMax = 89.9;
 		Active = false;
@@ -188,7 +190,7 @@ void USkywalkComponent::UpdateSkywalk()
 
 	if ((LastPlatformPosition - playerPosition).Size()>DistanceToGrabNewScraps) {
 		LastPlatformPosition = playerPosition;
-		ASkywalkPlatform* platform=SpawnPlatform(playerPosition + cameraForwardVector + FVector(0, 0, -100));
+		ASkywalkPlatform* platform=SpawnPlatform(playerPosition + cameraForwardVector*10 + FVector(0, 0, -100));
 		
 		platform->SpawnFirstLine();
 		platform->SetDelay(0.1);	//Spawns second scrap line after a delay
@@ -281,7 +283,7 @@ void USkywalkComponent::SortScrapsInWorld()
 					index++;
 					break;
 				}
-				if (scrapWithDist.distance < sortedScraps[i].distance) {
+				if (i<sortedScraps.Num() && scrapWithDist.distance < sortedScraps[i].distance) {
 					sortedScraps.Insert(scrapWithDist, i);
 					index++;
 					break;
@@ -290,8 +292,8 @@ void USkywalkComponent::SortScrapsInWorld()
 		}
 	}
 
-	ScrapsInWorld.SetNum(scrapsNum);
-	for (int i = 0; i < scrapsNum; i++) {
+	ScrapsInWorld.SetNum(sortedScraps.Num());
+	for (int i = 0; i < sortedScraps.Num(); i++) {
 		ScrapsInWorld[i] = sortedScraps[i].scrap;
 		UE_LOG(LogTemp, Warning, TEXT("scrap distance : %f"), sortedScraps[i].distance);
 	}
