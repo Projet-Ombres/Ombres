@@ -9,7 +9,22 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "SkywalkComponent.generated.h"
 
+
+
+USTRUCT()
+struct FScrapWithDistance {
+	GENERATED_BODY()
+
+	UPROPERTY()
+	AActor* scrap;
+	UPROPERTY()
+	float distance;
+};
+
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPowerStateChanged);
+
 
 
 UCLASS(ClassGroup=(Custom),meta=(BlueprintSpawnableComponent),Blueprintable)
@@ -108,7 +123,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator TargetRotation;
 
-
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "NOT Tweakable")
 	bool Active;
 
@@ -143,10 +157,16 @@ public:
 	bool SpellEnabled;
 
 	UPROPERTY(EditAnywhere)
-		FVector VFXScale;
+	FVector VFXScale;
 
 	UPROPERTY(EditAnywhere)
-		FRotator VFXRotation;
+	FRotator VFXRotation;
+
+	UPROPERTY()
+	TArray<int> propsTypes;
+
+	UPROPERTY(EditAnywhere)
+		UMaterialInterface* PreviewMaterial;
 
 protected:
 	virtual void BeginPlay() override;
@@ -175,33 +195,12 @@ private:
 	UPROPERTY()
 	bool OnCoolDown;
 
-
-
 	float currentTime;
 	FTimerHandle secondLineTimerHandle;
 
+	UFUNCTION()
+		void GeneratePropsTypes();
+
+	UFUNCTION()
+		void SortScrapsInWorld();
 };
-/*
-struct FECS_System {
-	virtual void update(entt::registry& registry,float dt) {
-
-	}
-};
-
-
-struct FEntityTransform {
-	FTransform transform;
-};
-
-struct FEntityMesh {
-	UStaticMesh* staticMesh;
-};
-
-
-struct FTestComponent : FECS_System {
-	void update(entt::registry& registry,float dt) override {
-		registry.view<FEntityTransform, FEntityMesh>().each([&, dt](auto entity, FEntityTransform& transform, FEntityMesh& mesh) {
-			
-		});
-	}
-};*/

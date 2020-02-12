@@ -90,6 +90,12 @@ public:
 	UPROPERTY()
 	TArray<FRotator> startRotations2;
 
+	UPROPERTY()
+		TArray<AActor*> previews1;
+
+	UPROPERTY()
+		TArray<AActor*> previews2;
+
 	UFUNCTION()
 	void AddScrap(AActor* scrapToAdd, int LineIndex, int Line);
 

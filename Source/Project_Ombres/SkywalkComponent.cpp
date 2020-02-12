@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "EngineUtils.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 USkywalkComponent::USkywalkComponent()
@@ -30,7 +31,7 @@ USkywalkComponent::USkywalkComponent()
 	DistanceToGrabNewScraps = 125;
 	SpaceBetweenScraps = 100;
 	DistanceFromCamera2 = 1400;
-	BasePlatformAngle = 15;
+	BasePlatformAngle = 25;
 	TilesSpawnProbability = 0.9;
 	SpellEnabled = true;
 
@@ -96,9 +97,11 @@ void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void USkywalkComponent::StartSkyWalk()
 {
-
 	if (SpellEnabled) {
 		if (!OnCoolDown) {
+			SortScrapsInWorld();
+			GeneratePropsTypes();
+
 			Active = true;
 			APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 			cameraManager->ViewPitchMin = -45;
@@ -123,12 +126,13 @@ void USkywalkComponent::StartSkyWalk()
 void USkywalkComponent::EndSkyWalk()
 {
 	if (Active) {
-		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0, 0, -75));
-		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0, 0, -75));
 
+		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+		FVector cameraForwardVector = cameraManager->GetCameraRotation().Vector();
+		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0,0,-100) );
+		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0,0,-100) );
 
 		Player->GetCharacterMovement()->MaxWalkSpeed = 765;
-		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 		cameraManager->ViewPitchMin = -89.9;
 		cameraManager->ViewPitchMax = 89.9;
 		Active = false;
@@ -173,11 +177,11 @@ void USkywalkComponent::UpdateSkywalk()
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector playerPosition = Player->GetActorLocation();
 	FVector cameraPosition = cameraManager->GetCameraLocation();
-	TargetRotation = cameraManager->GetCameraRotation();
+	FRotator cameraRotation = cameraManager->GetCameraRotation();
+	TargetRotation = FRotator(FMath::Clamp<float>(cameraRotation.Pitch + BasePlatformAngle, -40, 40), cameraRotation.Yaw, cameraRotation.Roll);
 	FVector cameraForwardVector = TargetRotation.Vector();
 	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*(ScrapsPerLine%2==0?SpaceBetweenScraps/2:SpaceBetweenScraps);
 	FVector offsetVector = FVector(0, 0, -25);
-
 
 	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector-cameraRightVector;
 	ScrapFinalMiddlePosition = playerPosition + cameraForwardVector * 350 + offsetVector - cameraRightVector;
@@ -185,24 +189,21 @@ void USkywalkComponent::UpdateSkywalk()
 	ScrapMiddlePosition = cameraPosition + cameraForwardVector * DistanceFromCamera- cameraRightVector;
 	ScrapRightOffset = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * SpaceBetweenScraps;
 
-
 	if ((LastPlatformPosition - playerPosition).Size()>DistanceToGrabNewScraps) {
 		LastPlatformPosition = playerPosition;
-		ASkywalkPlatform* platform=SpawnPlatform(playerPosition + cameraForwardVector + FVector(0, 0, -100));
+		ASkywalkPlatform* platform=SpawnPlatform(playerPosition + cameraForwardVector*10 + FVector(0, 0, -100));
 		
 		platform->SpawnFirstLine();
 		platform->SetDelay(0.1);	//Spawns second scrap line after a delay
 	}
-
-
 }
 
 ASkywalkPlatform* USkywalkComponent::SpawnPlatform(FVector Position)
 {
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FRotator cameraRotation=cameraManager->GetCameraRotation();
+	
 	FRotator targetRotation = FRotator(FMath::Clamp<float>(cameraRotation.Pitch + BasePlatformAngle, -40, 40), cameraRotation.Yaw, cameraRotation.Roll);
-
 	ASkywalkPlatform* platform=Cast<ASkywalkPlatform>(GetWorld()->SpawnActor(ASkywalkPlatform::StaticClass(), &Position, &targetRotation));
 	platform->FadeTime = ScrapsLevitationDuration + BringScrapDuration + PlaceScrapDuration;
 	platform->skywalkComponent = this;
@@ -226,32 +227,12 @@ void USkywalkComponent::ReleaseScraps()
 
 AActor* USkywalkComponent::GetClosestScrap()
 {
-	AActor* nearest = nullptr;
-
-	float minDist = TNumericLimits<float>::Max();
-
-	for (int i = 0, l = ScrapsInWorld.Num(); i < l; i++) {
-		AActor* actor = ScrapsInWorld[i];
-		if (actor == NULL) {
-			ScrapsInWorld.RemoveAt(i);
-			i--;
-			l--;
-			continue;
-		}
-
-		if (!ScrapsInUse.Contains(actor)) {
-			if (actor != NULL && Player != NULL) {
-				float distance = FVector::Dist(Player->GetActorLocation(), actor->GetActorLocation());
-
-				if (distance < minDist && distance < MaxRangeToGrabScrap) {
-					nearest = actor;
-					minDist = distance;
-				}
-			}
-			
-		}
+	if (ScrapsInWorld.Num() > 0) {
+		return ScrapsInWorld[0];
 	}
-	return nearest;
+	else {
+		return nullptr;
+	}
 }
 
 
@@ -262,5 +243,58 @@ void USkywalkComponent::FinishSkywalk()
 	EndSkyWalk();
 }
 
+void USkywalkComponent::GeneratePropsTypes()
+{
+	propsTypes.Empty();
+	propsTypes.SetNum(100);
+
+	for (int i = 0; i < 100; i++) {
+		propsTypes[i] = FMath::RandRange(0, 7);
+	}
+}
 
 
+void USkywalkComponent::SortScrapsInWorld()
+{
+	TArray<FScrapWithDistance> scrapsWithDistance;
+	FVector playerLocation = Player->GetActorLocation();
+
+	for (int i =0,l=ScrapsInWorld.Num();i<l;i++){
+		AActor* Actor = ScrapsInWorld[i];
+		FScrapWithDistance scrapWithDistance;
+		scrapWithDistance.scrap = Actor;
+		scrapWithDistance.distance = UKismetMathLibrary::Vector_Distance(Actor->GetActorLocation(), playerLocation);
+		scrapsWithDistance.Add(scrapWithDistance);
+	}
+
+	TArray<FScrapWithDistance> sortedScraps;
+
+	int index = 0;
+	int scrapsNum = scrapsWithDistance.Num();
+	while (index < scrapsNum) {
+		FScrapWithDistance scrapWithDist = scrapsWithDistance[index];
+		for (int i = 0, l = scrapsWithDistance.Num(); i < l; i++) {
+			if (i >= index) {
+				sortedScraps.Add(scrapWithDist);
+				index++;
+				break;
+			}
+			else {
+				if (scrapWithDist.distance > MaxRangeToGrabScrap) {
+					index++;
+					break;
+				}
+				if (i<sortedScraps.Num() && scrapWithDist.distance < sortedScraps[i].distance) {
+					sortedScraps.Insert(scrapWithDist, i);
+					index++;
+					break;
+				}
+			}
+		}
+	}
+
+	ScrapsInWorld.SetNum(sortedScraps.Num());
+	for (int i = 0; i < sortedScraps.Num(); i++) {
+		ScrapsInWorld[i] = sortedScraps[i].scrap;
+	}
+}

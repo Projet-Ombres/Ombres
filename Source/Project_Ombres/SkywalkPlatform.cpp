@@ -84,6 +84,12 @@ void ASkywalkPlatform::AddScrap(AActor* scrapToAdd, int LineIndex, int Line)
 		firstLineBigNoiseRefPositions[LineIndex] = UKismetMathLibrary::RandomUnitVector() * NoiseAmplitude * 3;
 		startPositions1[LineIndex] = scrapToAdd->GetActorLocation();
 		startRotations1[LineIndex] = scrapToAdd->GetActorRotation();
+		AStaticMeshActor* preview = GetWorld()->SpawnActor<AStaticMeshActor>();
+		preview->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
+		preview->GetStaticMeshComponent()->SetStaticMesh(Cast<UStaticMeshComponent>(scrapToAdd->GetComponentByClass(UStaticMeshComponent::StaticClass()))->GetStaticMesh());
+		preview->GetStaticMeshComponent()->SetMaterial(0,skywalkComponent->PreviewMaterial);
+		preview->SetActorEnableCollision(false);
+		previews1[LineIndex] = preview;
 	}
 	else {
 		activeScraps2[LineIndex] = scrapToAdd;
@@ -91,12 +97,19 @@ void ASkywalkPlatform::AddScrap(AActor* scrapToAdd, int LineIndex, int Line)
 		secondLineBigNoiseRefPositions[LineIndex] = UKismetMathLibrary::RandomUnitVector() * NoiseAmplitude * 3;
 		startPositions2[LineIndex] = scrapToAdd->GetActorLocation();
 		startRotations2[LineIndex] = scrapToAdd->GetActorRotation();
+		AStaticMeshActor* preview = GetWorld()->SpawnActor<AStaticMeshActor>();
+		preview->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
+		preview->GetStaticMeshComponent()->SetStaticMesh(Cast<UStaticMeshComponent>(scrapToAdd->GetComponentByClass(UStaticMeshComponent::StaticClass()))->GetStaticMesh());
+		preview->GetStaticMeshComponent()->SetMaterial(0, skywalkComponent->PreviewMaterial);
+		preview->SetActorEnableCollision(false);
+		previews2[LineIndex] = preview;
 	}
 }
 
 
 void ASkywalkPlatform::Tick(float DeltaTime){
 
+	FVector targetPosition;
 	if (activeScraps1.Num() != 0) {
 
 		progression1 += DeltaTime;
@@ -105,17 +118,22 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 		if (progression1 < BringScrapDuration) {
 			percent = progression1 / BringScrapDuration;
 			for (int i = 0, l = activeScraps1.Num(); i < l; i++) {
-				activeScraps1[i]->SetActorLocation(UKismetMathLibrary::VLerp(startPositions1[i], CalculateScrapTargetPosition(i, 0),FloatCurve1->GetFloatValue(percent)));
+				targetPosition = CalculateScrapTargetPosition(i, 0);
+				activeScraps1[i]->SetActorLocation(UKismetMathLibrary::VLerp(startPositions1[i], targetPosition,FloatCurve1->GetFloatValue(percent)));
 				activeScraps1[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations1[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression1/(BringScrapDuration+PlaceScrapDuration)),true));
+				previews1[i]->SetActorLocation(CalculateScrapFinalPosition(i, 0));
+				previews1[i]->SetActorRotation(skywalkComponent->TargetRotation);
 			}
 		}
 		else {
 			percent = (progression1 - BringScrapDuration) / PlaceScrapDuration;
 			if (percent < 1) {
 				for (int i = 0, l = activeScraps1.Num(); i < l; i++) {
-					activeScraps1[i]->SetActorLocation(UKismetMathLibrary::VLerp(intermediatePositions1[i], CalculateScrapFinalPosition(i, 0), FloatCurve2->GetFloatValue(percent)));
+					targetPosition = CalculateScrapFinalPosition(i, 0);
+					activeScraps1[i]->SetActorLocation(UKismetMathLibrary::VLerp(intermediatePositions1[i],targetPosition , FloatCurve2->GetFloatValue(percent)));
 					activeScraps1[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations1[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression1 / (BringScrapDuration + PlaceScrapDuration)), true));
-
+					previews1[i]->SetActorLocation(targetPosition);
+					previews1[i]->SetActorRotation(skywalkComponent->TargetRotation);
 				}
 			}
 			else {
@@ -127,6 +145,10 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 				firstLineBigNoiseRefPositions.Empty();
 				firstLineNoiseRefPositions.Empty();
 				startRotations1.Empty();
+				for (int j = 0, ll = previews1.Num(); j < ll; j++) {
+					previews1[j]->Destroy();
+				}
+				previews1.Empty();
 			}
 		}
 	}
@@ -138,16 +160,22 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 		if (progression2 < BringScrapDuration) {
 			percent = progression2 / BringScrapDuration;
 			for (int i = 0, l = activeScraps2.Num(); i < l; i++) {
-				activeScraps2[i]->SetActorLocation(UKismetMathLibrary::VLerp(startPositions2[i], CalculateScrapTargetPosition(i, 1), FloatCurve1->GetFloatValue(percent)));
+				targetPosition = CalculateScrapTargetPosition(i, 1);
+				activeScraps2[i]->SetActorLocation(UKismetMathLibrary::VLerp(startPositions2[i], targetPosition, FloatCurve1->GetFloatValue(percent)));
 				activeScraps2[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations2[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression2 / (BringScrapDuration + PlaceScrapDuration)), true));
+				previews2[i]->SetActorLocation(CalculateScrapFinalPosition(i, 1));
+				previews2[i]->SetActorRotation(skywalkComponent->TargetRotation);
 			}
 		}
 		else {
 			percent = (progression1 - BringScrapDuration) / PlaceScrapDuration;
 			if (percent < 1) {
-				for (int i = 0, l = activeScraps1.Num(); i < l; i++) {
+				for (int i = 0, l = activeScraps2.Num(); i < l; i++) {
+					targetPosition = CalculateScrapFinalPosition(i, 1);
 					activeScraps2[i]->SetActorLocation(UKismetMathLibrary::VLerp(intermediatePositions2[i], CalculateScrapFinalPosition(i, 1), FloatCurve2->GetFloatValue(percent)));
 					activeScraps2[i]->SetActorRotation(UKismetMathLibrary::RLerp(startRotations2[i], skywalkComponent->TargetRotation, RotationCurve->GetFloatValue(progression2 / (BringScrapDuration + PlaceScrapDuration)), true));
+					previews2[i]->SetActorLocation(targetPosition);
+					previews2[i]->SetActorRotation(skywalkComponent->TargetRotation);
 				}
 			}
 			else {
@@ -159,6 +187,10 @@ void ASkywalkPlatform::Tick(float DeltaTime){
 				secondLineBigNoiseRefPositions.Empty();
 				secondLineNoiseRefPositions.Empty();
 				startRotations2.Empty();
+				for (int j = 0, ll = previews2.Num(); j < ll; j++) {
+					previews2[j]->Destroy();
+				}
+				previews2.Empty();
 				SetActorTickEnabled(false);
 			}
 		}
@@ -271,6 +303,7 @@ void ASkywalkPlatform::SpawnFirstLine()
 	firstLineNoiseRefPositions.SetNum(arraySize);
 	intermediatePositions1.SetNum(arraySize);
 	startRotations1.SetNum(arraySize);
+	previews1.SetNum(arraySize);
 
 	progression1 = 0;
 
@@ -291,6 +324,7 @@ void ASkywalkPlatform::SpawnSecondLine() {
 	intermediatePositions2.SetNum(arraySize);
 	progression2 = 0;
 	startRotations2.SetNum(arraySize);
+	previews2.SetNum(arraySize);
 
 	for (int i = 0, l = arraySize; i < l; i++) {
 		MoveClosestScrap(i, 1);
