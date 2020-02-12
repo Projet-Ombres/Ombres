@@ -88,6 +88,7 @@ void ASkywalkPlatform::AddScrap(AActor* scrapToAdd, int LineIndex, int Line)
 		preview->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
 		preview->GetStaticMeshComponent()->SetStaticMesh(Cast<UStaticMeshComponent>(scrapToAdd->GetComponentByClass(UStaticMeshComponent::StaticClass()))->GetStaticMesh());
 		preview->GetStaticMeshComponent()->SetMaterial(0,skywalkComponent->PreviewMaterial);
+		preview->SetActorEnableCollision(false);
 		previews1[LineIndex] = preview;
 	}
 	else {
@@ -100,6 +101,7 @@ void ASkywalkPlatform::AddScrap(AActor* scrapToAdd, int LineIndex, int Line)
 		preview->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
 		preview->GetStaticMeshComponent()->SetStaticMesh(Cast<UStaticMeshComponent>(scrapToAdd->GetComponentByClass(UStaticMeshComponent::StaticClass()))->GetStaticMesh());
 		preview->GetStaticMeshComponent()->SetMaterial(0, skywalkComponent->PreviewMaterial);
+		preview->SetActorEnableCollision(false);
 		previews2[LineIndex] = preview;
 	}
 }

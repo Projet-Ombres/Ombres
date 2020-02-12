@@ -129,8 +129,8 @@ void USkywalkComponent::EndSkyWalk()
 
 		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 		FVector cameraForwardVector = cameraManager->GetCameraRotation().Vector();
-		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0, 0, 50) + cameraForwardVector * (-20));
-		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0, 0, 50) + cameraForwardVector * (-20));
+		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0,0,-100) );
+		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0,0,-100) );
 
 		Player->GetCharacterMovement()->MaxWalkSpeed = 765;
 		cameraManager->ViewPitchMin = -89.9;
@@ -177,7 +177,8 @@ void USkywalkComponent::UpdateSkywalk()
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector playerPosition = Player->GetActorLocation();
 	FVector cameraPosition = cameraManager->GetCameraLocation();
-	TargetRotation = cameraManager->GetCameraRotation();
+	FRotator cameraRotation = cameraManager->GetCameraRotation();
+	TargetRotation = FRotator(FMath::Clamp<float>(cameraRotation.Pitch + BasePlatformAngle, -40, 40), cameraRotation.Yaw, cameraRotation.Roll);
 	FVector cameraForwardVector = TargetRotation.Vector();
 	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*(ScrapsPerLine%2==0?SpaceBetweenScraps/2:SpaceBetweenScraps);
 	FVector offsetVector = FVector(0, 0, -25);
@@ -201,8 +202,8 @@ ASkywalkPlatform* USkywalkComponent::SpawnPlatform(FVector Position)
 {
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FRotator cameraRotation=cameraManager->GetCameraRotation();
+	
 	FRotator targetRotation = FRotator(FMath::Clamp<float>(cameraRotation.Pitch + BasePlatformAngle, -40, 40), cameraRotation.Yaw, cameraRotation.Roll);
-
 	ASkywalkPlatform* platform=Cast<ASkywalkPlatform>(GetWorld()->SpawnActor(ASkywalkPlatform::StaticClass(), &Position, &targetRotation));
 	platform->FadeTime = ScrapsLevitationDuration + BringScrapDuration + PlaceScrapDuration;
 	platform->skywalkComponent = this;
@@ -295,6 +296,5 @@ void USkywalkComponent::SortScrapsInWorld()
 	ScrapsInWorld.SetNum(sortedScraps.Num());
 	for (int i = 0; i < sortedScraps.Num(); i++) {
 		ScrapsInWorld[i] = sortedScraps[i].scrap;
-		UE_LOG(LogTemp, Warning, TEXT("scrap distance : %f"), sortedScraps[i].distance);
 	}
 }
