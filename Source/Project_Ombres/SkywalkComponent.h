@@ -105,25 +105,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndSkyWalk();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapMiddlePosition;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapRightOffset;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapFinalMiddlePosition;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapMiddlePosition2;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapFinalMiddlePosition2;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator TargetRotation;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "NOT Tweakable")
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	bool Active;
 
 	UFUNCTION(BlueprintCallable)
@@ -168,6 +154,16 @@ public:
 	UPROPERTY(EditAnywhere)
 		UMaterialInterface* PreviewMaterial;
 
+	UPROPERTY(EditAnywhere)
+		int platformsToSpawnCount;
+
+	UPROPERTY()
+		APlayerCameraManager* CameraManager;
+
+	UPROPERTY(EditAnywhere)
+		float WalkSpeed;
+
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -203,4 +199,12 @@ private:
 
 	UFUNCTION()
 		void SortScrapsInWorld();
+
+	UPROPERTY()
+		float timeLeftToSpawnPlatform;
+
+	UPROPERTY()
+		int platformsSpawned;
+
+	
 };
