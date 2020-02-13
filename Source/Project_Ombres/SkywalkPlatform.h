@@ -53,6 +53,7 @@ public:
 	UPROPERTY()
 	float progression2;
 
+
 	UFUNCTION()
 	void SpawnFirstLine();
 
@@ -89,6 +90,12 @@ public:
 	UPROPERTY()
 	TArray<FRotator> startRotations2;
 
+	UPROPERTY()
+		TArray<AActor*> previews1;
+
+	UPROPERTY()
+		TArray<AActor*> previews2;
+
 	UFUNCTION()
 	void AddScrap(AActor* scrapToAdd, int LineIndex, int Line);
 
@@ -115,8 +122,23 @@ public:
 	UPROPERTY()
 	TArray<UStaticMesh*> props;
 
-	
+	UFUNCTION()
+		void CalculateCommonPositions();
 
+	UPROPERTY()
+		FVector ScrapFinalMiddlePosition2;
+
+	UPROPERTY()
+		FVector ScrapFinalMiddlePosition;
+
+	UPROPERTY()
+		FVector ScrapMiddlePosition;
+
+	UPROPERTY()
+		FVector ScrapMiddlePosition2;
+
+	UPROPERTY()
+		FVector ScrapRightOffset;
 
 protected:
 	// Called when the game starts or when spawned

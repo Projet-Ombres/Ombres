@@ -6,11 +6,25 @@
 #include "Components/ActorComponent.h"
 #include "MeshPassProcessor.h"
 #include "GameFramework/Character.h"
-#include "Engine/StaticMeshActor.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "SkywalkComponent.generated.h"
 
+
+
+USTRUCT()
+struct FScrapWithDistance {
+	GENERATED_BODY()
+
+	UPROPERTY()
+	AActor* scrap;
+	UPROPERTY()
+	float distance;
+};
+
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPowerStateChanged);
+
 
 
 UCLASS(ClassGroup=(Custom),meta=(BlueprintSpawnableComponent),Blueprintable)
@@ -91,26 +105,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndSkyWalk();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapMiddlePosition;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapRightOffset;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapFinalMiddlePosition;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapMiddlePosition2;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NOT Tweakable")
-	FVector ScrapFinalMiddlePosition2;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator TargetRotation;
 
-
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "NOT Tweakable")
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	bool Active;
 
 	UFUNCTION(BlueprintCallable)
@@ -144,20 +143,25 @@ public:
 	bool SpellEnabled;
 
 	UPROPERTY(EditAnywhere)
-		FVector VFXScale;
+	FVector VFXScale;
 
 	UPROPERTY(EditAnywhere)
-		FRotator VFXRotation;
-	
-
-	UPROPERTY(EditAnywhere)
-		UStaticMesh* ghostMesh;
-
-	UPROPERTY(EditAnywhere)
-		UMaterialInterface* ghostMaterial;
+	FRotator VFXRotation;
 
 	UPROPERTY()
-		AStaticMeshActor* GhostStaticMeshActor;
+	TArray<int> propsTypes;
+
+	UPROPERTY(EditAnywhere)
+		UMaterialInterface* PreviewMaterial;
+
+	UPROPERTY(EditAnywhere)
+		int platformsToSpawnCount;
+
+	UPROPERTY()
+		APlayerCameraManager* CameraManager;
+
+	UPROPERTY(EditAnywhere)
+		float WalkSpeed;
 
 
 protected:
@@ -187,34 +191,20 @@ private:
 	UPROPERTY()
 	bool OnCoolDown;
 
-
-
-
 	float currentTime;
 	FTimerHandle secondLineTimerHandle;
 
+	UFUNCTION()
+		void GeneratePropsTypes();
+
+	UFUNCTION()
+		void SortScrapsInWorld();
+
+	UPROPERTY()
+		float timeLeftToSpawnPlatform;
+
+	UPROPERTY()
+		int platformsSpawned;
+
+	
 };
-/*
-struct FECS_System {
-	virtual void update(entt::registry& registry,float dt) {
-
-	}
-};
-
-
-struct FEntityTransform {
-	FTransform transform;
-};
-
-struct FEntityMesh {
-	UStaticMesh* staticMesh;
-};
-
-
-struct FTestComponent : FECS_System {
-	void update(entt::registry& registry,float dt) override {
-		registry.view<FEntityTransform, FEntityMesh>().each([&, dt](auto entity, FEntityTransform& transform, FEntityMesh& mesh) {
-			
-		});
-	}
-};*/

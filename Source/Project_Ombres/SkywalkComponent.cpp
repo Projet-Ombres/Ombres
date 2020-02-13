@@ -8,48 +8,48 @@
 #include "Engine/StaticMesh.h"
 #include "SkywalkPlatform.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "EngineUtils.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 USkywalkComponent::USkywalkComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetComponentTickEnabled(false);
-	
 
-	SkyWalkDuration= 1.2;
+	SkyWalkDuration= 0.5;
 	SkyWalkCoolDown = 10;
 	BringScrapDuration = 0.5;
 	PlaceScrapDuration = 0.3;
 	MaxRangeToGrabScrap = 2000;
 	DistanceFromCamera = 700;
 	NoiseAmplitude = 100;
-	SpawnDistance = 400;
+	SpawnDistance = 200;
 	ScrapsPerLine = 3;
-	ScrapsLevitationDuration = 2;
+	ScrapsLevitationDuration = 3;
 	DistanceToGrabNewScraps = 125;
 	SpaceBetweenScraps = 100;
 	DistanceFromCamera2 = 1400;
-	BasePlatformAngle = 15;
+	BasePlatformAngle = 25;
 	TilesSpawnProbability = 0.9;
 	SpellEnabled = true;
+	platformsToSpawnCount = 7;
+	WalkSpeed = 150;
+
+	VFXScale = FVector(0.2f, 0.2f, 0.2f);
+	VFXRotation = FRotator(0, 0, -90);
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
 	if (VFX.Succeeded()) {
 		SkywalkVFX = VFX.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> staticMesh(TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube'"));
-	if (staticMesh.Succeeded()) {
-		ghostMesh = staticMesh.Object;
-	}
-
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> mat(TEXT("Material'/Game/Assets/SM/Cristal/Cristal_M.Cristal_M'"));
+
 	if (mat.Succeeded()) {
-		ghostMaterial = mat.Object;
+		PreviewMaterial = mat.Object;
 	}
-
-
 }
 
 
@@ -78,6 +78,8 @@ void USkywalkComponent::BeginPlay()
 			ScrapsInWorld.Add(Actor);
 		}
 	}
+
+	CameraManager= UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 }
 
 
@@ -94,6 +96,7 @@ void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			FinishSkywalk();
 		}
 		else {
+			timeLeftToSpawnPlatform -= DeltaTime;
 			UpdateSkywalk();
 		}
 
@@ -105,34 +108,29 @@ void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void USkywalkComponent::StartSkyWalk()
 {
-
 	if (SpellEnabled) {
 		if (!OnCoolDown) {
+			platformsSpawned = 0;
+			SortScrapsInWorld();
+			GeneratePropsTypes();
+			CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(),0);
+			FRotator cameraRotation = CameraManager->GetCameraRotation();
+
+			TargetRotation = FRotator(FMath::Clamp<float>(cameraRotation.Pitch + BasePlatformAngle, -40, 40), cameraRotation.Yaw, cameraRotation.Roll);
+
 			Active = true;
-			APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-			cameraManager->ViewPitchMin = -45;
-			cameraManager->ViewPitchMax = 45;
-			Player->GetCharacterMovement()->MaxWalkSpeed = 500;
+			CameraManager->ViewPitchMin = -45;
+			CameraManager->ViewPitchMax = 45;
+			Player->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 			CurrentCoolDown = 0;
 			OnCoolDown = true;
 			LastPlatformPosition = Player->GetActorLocation();
 			currentTime = 0;
 
-			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USceneComponent>(Player->GetComponentByClass(UCameraComponent::StaticClass())), NAME_None, FVector(SpawnDistance, 0, -50), FRotator(25, 0, 0), FVector(1.5, 1.5, 1.5), EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
+			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(0, 0, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
 
 			SetComponentTickEnabled(true);
-
-
-			//spawn le fantôme
-			GhostStaticMeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(LastPlatformPosition, cameraManager->GetCameraRotation());
-			GhostStaticMeshActor->SetActorScale3D(FVector(5, 3, 0.5f));
-			GhostStaticMeshActor->SetMobility(EComponentMobility::Movable);
-			GhostStaticMeshActor->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
-			GhostStaticMeshActor->GetStaticMeshComponent()->SetStaticMesh(ghostMesh);
-			GhostStaticMeshActor->GetStaticMeshComponent()->SetMaterial(0, ghostMaterial);
-			GhostStaticMeshActor->SetActorEnableCollision(false);
-
 			OnSkywalkStart.Broadcast();
 		}
 	}
@@ -143,22 +141,19 @@ void USkywalkComponent::StartSkyWalk()
 void USkywalkComponent::EndSkyWalk()
 {
 	if (Active) {
-		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0, 0, -75));
-		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0, 0, -75));
 
+		/*FVector cameraForwardVector = cameraManager->GetCameraRotation().Vector();
+		SpawnPlatform(ScrapFinalMiddlePosition + FVector(0,0,-100) );
+		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0,0,-100) );*/
 
 		Player->GetCharacterMovement()->MaxWalkSpeed = 765;
-		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-		cameraManager->ViewPitchMin = -89.9;
-		cameraManager->ViewPitchMax = 89.9;
+		CameraManager->ViewPitchMin = -89.9;
+		CameraManager->ViewPitchMax = 89.9;
 		Active = false;
 		OnCoolDown = true;
 
 		ScrapsInUse.Empty();
 		spawnedVFX->DestroyComponent();
-
-		//on détruit le fantôme à la fin du skywalk
-		GhostStaticMeshActor->Destroy();
 		
 		OnSkywalkEnd.Broadcast();
 	}
@@ -191,51 +186,35 @@ void USkywalkComponent::ResetCoolDown()
 
 void USkywalkComponent::UpdateSkywalk()
 {
-
-	float completion = currentTime / SkyWalkDuration;
-
 	//UE_LOG(LogTemp, Warning, TEXT("Update skywalk"));
-	Player->GetCharacterMovement()->MaxWalkSpeed = 500;
-	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	Player->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	FVector playerPosition = Player->GetActorLocation();
-	float speed = Player->GetVelocity().Size();
-
-	FVector cameraPosition = cameraManager->GetCameraLocation();
-	TargetRotation = cameraManager->GetCameraRotation();
-	FVector cameraForwardVector = TargetRotation.Vector();
-	FVector cameraRightVector = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector()*(ScrapsPerLine%2==0?SpaceBetweenScraps/2:SpaceBetweenScraps);
-	FVector offsetVector = FVector(0, 0, -25);
-	FVector ghostPosition = playerPosition + FVector(0, 0, -100) + cameraForwardVector * (500+300*(1-completion)*speed/760);
-	FVector ghostScale = FVector(7 * (1 - completion) * speed/760, 3, 0.5f);
-
-	ScrapFinalMiddlePosition2 = playerPosition + cameraForwardVector * 700 + offsetVector-cameraRightVector;
-	ScrapFinalMiddlePosition = playerPosition + cameraForwardVector * 350 + offsetVector - cameraRightVector;
-	ScrapMiddlePosition2 = cameraPosition + cameraForwardVector * DistanceFromCamera2- cameraRightVector;
-	ScrapMiddlePosition = cameraPosition + cameraForwardVector * DistanceFromCamera- cameraRightVector;
-	ScrapRightOffset = (cameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * SpaceBetweenScraps;
-
-	GhostStaticMeshActor->SetActorLocation(ghostPosition);
-	GhostStaticMeshActor->SetActorRotation(TargetRotation);
-	GhostStaticMeshActor->SetActorScale3D(ghostScale);
 	
+	FVector cameraForwardVector = TargetRotation.Vector();
 
-	if ((LastPlatformPosition - playerPosition).Size()>DistanceToGrabNewScraps) {
+	float distanceBetweenPlatforms = SpawnDistance * platformsSpawned;
+
+
+
+	
+	if (timeLeftToSpawnPlatform<=0) {
+		timeLeftToSpawnPlatform = SkyWalkDuration / platformsToSpawnCount;
 		LastPlatformPosition = playerPosition;
-		ASkywalkPlatform* platform=SpawnPlatform(playerPosition + cameraForwardVector + FVector(0, 0, -100));
+		ASkywalkPlatform* platform=SpawnPlatform(playerPosition + cameraForwardVector* distanceBetweenPlatforms + FVector(0, 0, -100));
 		
 		platform->SpawnFirstLine();
 		platform->SetDelay(0.1);	//Spawns second scrap line after a delay
+
+		platformsSpawned++;
 	}
-
-
 }
 
 ASkywalkPlatform* USkywalkComponent::SpawnPlatform(FVector Position)
 {
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FRotator cameraRotation=cameraManager->GetCameraRotation();
+	
 	FRotator targetRotation = FRotator(FMath::Clamp<float>(cameraRotation.Pitch + BasePlatformAngle, -40, 40), cameraRotation.Yaw, cameraRotation.Roll);
-
 	ASkywalkPlatform* platform=Cast<ASkywalkPlatform>(GetWorld()->SpawnActor(ASkywalkPlatform::StaticClass(), &Position, &targetRotation));
 	platform->FadeTime = ScrapsLevitationDuration + BringScrapDuration + PlaceScrapDuration;
 	platform->skywalkComponent = this;
@@ -259,32 +238,12 @@ void USkywalkComponent::ReleaseScraps()
 
 AActor* USkywalkComponent::GetClosestScrap()
 {
-	AActor* nearest = nullptr;
-
-	float minDist = TNumericLimits<float>::Max();
-
-	for (int i = 0, l = ScrapsInWorld.Num(); i < l; i++) {
-		AActor* actor = ScrapsInWorld[i];
-		if (actor == NULL) {
-			ScrapsInWorld.RemoveAt(i);
-			i--;
-			l--;
-			continue;
-		}
-
-		if (!ScrapsInUse.Contains(actor)) {
-			if (actor != NULL && Player != NULL) {
-				float distance = FVector::Dist(Player->GetActorLocation(), actor->GetActorLocation());
-
-				if (distance < minDist && distance < MaxRangeToGrabScrap) {
-					nearest = actor;
-					minDist = distance;
-				}
-			}
-			
-		}
+	if (ScrapsInWorld.Num() > 0) {
+		return ScrapsInWorld[0];
 	}
-	return nearest;
+	else {
+		return nullptr;
+	}
 }
 
 
@@ -295,5 +254,58 @@ void USkywalkComponent::FinishSkywalk()
 	EndSkyWalk();
 }
 
+void USkywalkComponent::GeneratePropsTypes()
+{
+	propsTypes.Empty();
+	propsTypes.SetNum(100);
+
+	for (int i = 0; i < 100; i++) {
+		propsTypes[i] = FMath::RandRange(0, 7);
+	}
+}
 
 
+void USkywalkComponent::SortScrapsInWorld()
+{
+	TArray<FScrapWithDistance> scrapsWithDistance;
+	FVector playerLocation = Player->GetActorLocation();
+
+	for (int i =0,l=ScrapsInWorld.Num();i<l;i++){
+		AActor* Actor = ScrapsInWorld[i];
+		FScrapWithDistance scrapWithDistance;
+		scrapWithDistance.scrap = Actor;
+		scrapWithDistance.distance = UKismetMathLibrary::Vector_Distance(Actor->GetActorLocation(), playerLocation);
+		scrapsWithDistance.Add(scrapWithDistance);
+	}
+
+	TArray<FScrapWithDistance> sortedScraps;
+
+	int index = 0;
+	int scrapsNum = scrapsWithDistance.Num();
+	while (index < scrapsNum) {
+		FScrapWithDistance scrapWithDist = scrapsWithDistance[index];
+		for (int i = 0, l = scrapsWithDistance.Num(); i < l; i++) {
+			if (i >= index) {
+				sortedScraps.Add(scrapWithDist);
+				index++;
+				break;
+			}
+			else {
+				if (scrapWithDist.distance > MaxRangeToGrabScrap) {
+					index++;
+					break;
+				}
+				if (i<sortedScraps.Num() && scrapWithDist.distance < sortedScraps[i].distance) {
+					sortedScraps.Insert(scrapWithDist, i);
+					index++;
+					break;
+				}
+			}
+		}
+	}
+
+	ScrapsInWorld.SetNum(sortedScraps.Num());
+	for (int i = 0; i < sortedScraps.Num(); i++) {
+		ScrapsInWorld[i] = sortedScraps[i].scrap;
+	}
+}
