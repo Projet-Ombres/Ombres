@@ -67,6 +67,28 @@ ASkywalkPlatform::ASkywalkPlatform()
 }
 
 
+void ASkywalkPlatform::CalculateCommonPositions()
+{
+	ACharacter* Player = skywalkComponent->Player;
+	APlayerCameraManager* CameraManager = skywalkComponent->CameraManager;
+	FVector playerPosition = Player->GetActorLocation();
+	FVector cameraPosition = CameraManager->GetCameraLocation();
+	FRotator cameraRotation = CameraManager->GetCameraRotation();
+
+	FVector cameraForwardVector = skywalkComponent->TargetRotation.Vector();
+	FVector cameraRightVector = (CameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * (skywalkComponent->ScrapsPerLine % 2 == 0 ? skywalkComponent->SpaceBetweenScraps / 2 : skywalkComponent->SpaceBetweenScraps);
+	FVector offsetVector = FVector(0, 0, -25);
+
+	FVector platformLocation = GetActorLocation();
+	FVector platformLocationALittleAbove = platformLocation + FVector(0, 0, 100);
+
+	ScrapFinalMiddlePosition2 = platformLocation + cameraForwardVector * (200) + offsetVector - cameraRightVector;
+	ScrapFinalMiddlePosition = platformLocation + offsetVector - cameraRightVector;
+	ScrapMiddlePosition2 = cameraPosition + cameraForwardVector * (skywalkComponent->DistanceFromCamera2) - cameraRightVector;
+	ScrapMiddlePosition = cameraPosition + cameraForwardVector * (skywalkComponent->DistanceFromCamera) - cameraRightVector;
+	ScrapRightOffset = (CameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * skywalkComponent->SpaceBetweenScraps;
+}
+
 void ASkywalkPlatform::BeginPlay()
 {
 	Super::BeginPlay();
@@ -110,6 +132,8 @@ void ASkywalkPlatform::AddScrap(AActor* scrapToAdd, int LineIndex, int Line)
 void ASkywalkPlatform::Tick(float DeltaTime){
 
 	FVector targetPosition;
+
+	CalculateCommonPositions();
 	if (activeScraps1.Num() != 0) {
 
 		progression1 += DeltaTime;
@@ -229,20 +253,19 @@ void ASkywalkPlatform::ResetPhysics2()
 }
 FVector ASkywalkPlatform::CalculateScrapTargetPosition(int scrapIndex,int line)
 {
-	FVector rightOffset = skywalkComponent->ScrapRightOffset;
 	FVector BigNoiseRefPosition;
 	FVector middlePosition;
 
 	if (line == 0) {
-		middlePosition = skywalkComponent->ScrapMiddlePosition;
+		middlePosition = ScrapMiddlePosition;
 		BigNoiseRefPosition = firstLineBigNoiseRefPositions[scrapIndex];
 		
 	}
 	else {
-		middlePosition = skywalkComponent->ScrapMiddlePosition2;
+		middlePosition = ScrapMiddlePosition2;
 		BigNoiseRefPosition = secondLineBigNoiseRefPositions[scrapIndex];
 	}
-	FVector res = middlePosition + BigNoiseRefPosition + rightOffset * scrapIndex;
+	FVector res = middlePosition + BigNoiseRefPosition + ScrapRightOffset * scrapIndex;
 
 	if (line == 0) {
 		intermediatePositions1[scrapIndex] = res;
@@ -257,20 +280,19 @@ FVector ASkywalkPlatform::CalculateScrapTargetPosition(int scrapIndex,int line)
 
 FVector ASkywalkPlatform::CalculateScrapFinalPosition(int scrapIndex,int line)
 {
-	FVector rightOffset = skywalkComponent->ScrapRightOffset;
 	FVector NoiseRefPosition;
 	FVector middlePosition;
 
 	if (line == 0) {
-		middlePosition = skywalkComponent->ScrapFinalMiddlePosition;
+		middlePosition = ScrapFinalMiddlePosition;
 		NoiseRefPosition = firstLineNoiseRefPositions[scrapIndex];
 	}
 	else {
-		middlePosition = skywalkComponent->ScrapFinalMiddlePosition2;
+		middlePosition = ScrapFinalMiddlePosition2;
 		NoiseRefPosition = secondLineNoiseRefPositions[scrapIndex];
 	}
 
-	return middlePosition + NoiseRefPosition + rightOffset * scrapIndex;
+	return middlePosition + NoiseRefPosition + ScrapRightOffset * scrapIndex;
 }
 
 
