@@ -272,10 +272,12 @@ void USkywalkComponent::SortScrapsInWorld()
 
 	for (int i =0,l=ScrapsInWorld.Num();i<l;i++){
 		AActor* Actor = ScrapsInWorld[i];
-		FScrapWithDistance scrapWithDistance;
-		scrapWithDistance.scrap = Actor;
-		scrapWithDistance.distance = UKismetMathLibrary::Vector_Distance(Actor->GetActorLocation(), playerLocation);
-		scrapsWithDistance.Add(scrapWithDistance);
+		if (IsValid(Actor)) {
+			FScrapWithDistance scrapWithDistance;
+			scrapWithDistance.scrap = Actor;
+			scrapWithDistance.distance = UKismetMathLibrary::Vector_Distance(Actor->GetActorLocation(), playerLocation);
+			scrapsWithDistance.Add(scrapWithDistance);
+		}
 	}
 
 	TArray<FScrapWithDistance> sortedScraps;
