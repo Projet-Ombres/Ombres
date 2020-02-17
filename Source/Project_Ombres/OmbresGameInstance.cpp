@@ -5,7 +5,6 @@
 #include "MoviePlayer.h"
 #include "Engine.h"
 #include "TimerManager.h"
-#include "SLoadingScreenWidget.h"
 
 void UOmbresGameInstance::Init()
 {
