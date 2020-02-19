@@ -163,6 +163,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		float WalkSpeed;
 
+	UPROPERTY(EditAnywhere)
+		bool EnablePreviews;
+
 
 protected:
 	virtual void BeginPlay() override;

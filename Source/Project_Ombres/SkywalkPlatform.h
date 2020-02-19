@@ -140,6 +140,8 @@ public:
 	UPROPERTY()
 		FVector ScrapRightOffset;
 
+	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -167,5 +169,8 @@ private:
 
 	UFUNCTION()
 	void SpawnSecondLine();
+
+	UPROPERTY()
+		bool EnablePreviews;
 
 };
