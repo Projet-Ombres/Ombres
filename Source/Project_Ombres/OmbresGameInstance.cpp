@@ -5,6 +5,7 @@
 #include "MoviePlayer.h"
 #include "Engine.h"
 #include "TimerManager.h"
+#include "Engine/AssetManager.h"
 
 void UOmbresGameInstance::Init()
 {
@@ -42,10 +43,10 @@ void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 	bool ready = true;
 	for (int i = 0, l = streamingLevels.Num(); i < l; i++) {
 		
-		if (!streamingLevels[i]->IsLevelLoaded()) {
+		if (!streamingLevels[i]->HasLoadRequestPending()) {
 			ready = false;
 
-			UE_LOG(LogTemp, Warning, TEXT("Level streaming %i loaded"),i);
+			UE_LOG(LogTemp, Warning, TEXT("Level streaming %i loading"), i);
 			break;
 		}
 	}
@@ -54,5 +55,30 @@ void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 	if (ready) {
 		GetMoviePlayer()->PassLoadingScreenWindowBackToGame();
 		GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+		OnFullLevelLoaded.Broadcast();
 	}
+}
+
+
+void UOmbresGameInstance::LoadLevelAsync(FString LevelPath)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Loading level %s"), *LevelPath);
+	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
+	UE_LOG(LogTemp, Warning, TEXT("zbeyb %s"), *LevelPath);
+
+	FSoftObjectPath levelToLoad = FSoftObjectPath(FName( *LevelPath),FString());
+
+
+
+	StreamableManager.RequestAsyncLoad(levelToLoad, FStreamableDelegate::CreateUObject(this, &UOmbresGameInstance::OnAsyncLoadingComplete));
+	LevelCompletePath = LevelPath;
+}
+
+void UOmbresGameInstance::OnAsyncLoadingComplete()
+{
+	int index;
+	LevelCompletePath.FindLastChar(TEXT("/")[0], index);
+	FString relativePath = LevelCompletePath.RightChop(index);
+	UGameplayStatics::LoadStreamLevel(GEngine->GetWorld(), *relativePath, true, false, FLatentActionInfo());
+	UE_LOG(LogTemp, Warning, TEXT("Level %s loaded"), *LevelCompletePath);
 }
