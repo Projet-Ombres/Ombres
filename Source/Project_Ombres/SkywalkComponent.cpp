@@ -40,6 +40,8 @@ USkywalkComponent::USkywalkComponent()
 	VFXScale = FVector(0.2f, 0.2f, 0.2f);
 	VFXRotation = FRotator(0, 0, -90);
 
+	EnablePreviews = true;
+
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
 	if (VFX.Succeeded()) {
 		SkywalkVFX = VFX.Object;
@@ -147,6 +149,7 @@ void USkywalkComponent::EndSkyWalk()
 		SpawnPlatform(ScrapFinalMiddlePosition2 + FVector(0,0,-100) );*/
 
 		Player->GetCharacterMovement()->MaxWalkSpeed = 765;
+		Player->GetCharacterMovement()->Velocity = Player->GetActorForwardVector() * 765;
 		CameraManager->ViewPitchMin = -89.9;
 		CameraManager->ViewPitchMax = 89.9;
 		Active = false;
