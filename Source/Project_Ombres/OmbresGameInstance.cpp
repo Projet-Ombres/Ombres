@@ -60,25 +60,3 @@ void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 }
 
 
-void UOmbresGameInstance::LoadLevelAsync(FString LevelPath)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Loading level %s"), *LevelPath);
-	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-	UE_LOG(LogTemp, Warning, TEXT("zbeyb %s"), *LevelPath);
-
-	FSoftObjectPath levelToLoad = FSoftObjectPath(FName( *LevelPath),FString());
-
-
-
-	StreamableManager.RequestAsyncLoad(levelToLoad, FStreamableDelegate::CreateUObject(this, &UOmbresGameInstance::OnAsyncLoadingComplete));
-	LevelCompletePath = LevelPath;
-}
-
-void UOmbresGameInstance::OnAsyncLoadingComplete()
-{
-	int index;
-	LevelCompletePath.FindLastChar(TEXT("/")[0], index);
-	FString relativePath = LevelCompletePath.RightChop(index);
-	UGameplayStatics::LoadStreamLevel(GEngine->GetWorld(), *relativePath, true, false, FLatentActionInfo());
-	UE_LOG(LogTemp, Warning, TEXT("Level %s loaded"), *LevelCompletePath);
-}
