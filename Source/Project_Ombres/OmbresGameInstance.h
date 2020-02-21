@@ -19,16 +19,6 @@ class PROJECT_OMBRES_API UOmbresGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 
-public:
-	UFUNCTION(BlueprintCallable)
-	 void LoadLevelAsync(FString LevelPath);
-
-	UFUNCTION()
-		 void OnAsyncLoadingComplete();
-
-
-	UPROPERTY()
-		 FString LevelCompletePath;
 
 protected:
 
