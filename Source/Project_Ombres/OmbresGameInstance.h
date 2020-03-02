@@ -40,5 +40,8 @@ private:
 	UPROPERTY(BlueprintAssignable)
 		FBasicDelegate OnFullLevelLoaded;
 
+	UPROPERTY(BlueprintAssignable)
+		FBasicDelegate OnBaseLevelLoaded;
+
 	
 };
