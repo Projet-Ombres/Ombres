@@ -20,7 +20,13 @@ class PROJECT_OMBRES_API UCustomFunctionLibrary : public UBlueprintFunctionLibra
 	
 
 public:
-	
+
+	template <typename Key>
+	UFUNCTION(BlueprintCallable)
+	static FORCEINLINE TMap<Key,float>* SetMapElement(TMap<Key, float> &Map, Key key,float value) {
+		Map[key] = value;
+		return Map;
+	}
 
 #if WITH_EDITOR
 
