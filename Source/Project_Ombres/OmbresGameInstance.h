@@ -4,15 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Engine/StreamableManager.h"
 #include "OmbresGameInstance.generated.h"
 
 /**
  * 
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBasicDelegate);
+
 UCLASS()
 class PROJECT_OMBRES_API UOmbresGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+
+
 
 protected:
 
@@ -30,5 +36,12 @@ private:
 
 	UFUNCTION()
 		void CheckIsLoadingSubLevels();
+
+	UPROPERTY(BlueprintAssignable)
+		FBasicDelegate OnFullLevelLoaded;
+
+	UPROPERTY(BlueprintAssignable)
+		FBasicDelegate OnBaseLevelLoaded;
+
 	
 };
