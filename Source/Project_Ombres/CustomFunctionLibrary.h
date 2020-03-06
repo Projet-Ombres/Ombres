@@ -8,6 +8,9 @@
 #include "Materials/MaterialInterface.h"
 #include "Materials/Material.h"
 #include "ConstructorHelpers.h"
+#include "Misc/Char.h"
+#include <string>
+#include <algorithm>
 #include "CustomFunctionLibrary.generated.h"
 
 /**
@@ -18,15 +21,18 @@ class PROJECT_OMBRES_API UCustomFunctionLibrary : public UBlueprintFunctionLibra
 {
 	GENERATED_BODY()
 	
-
 public:
 
-	template <typename Key>
-	UFUNCTION(BlueprintCallable)
-	static FORCEINLINE TMap<Key,float>* SetMapElement(TMap<Key, float> &Map, Key key,float value) {
-		Map[key] = value;
-		return Map;
+	UFUNCTION(BlueprintCallable,BlueprintPure)
+	static const FString CorrectJson(FString string) {
+		string.RemoveSpacesInline();
+		std::string stdString(TCHAR_TO_UTF8(*string));
+		
+		stdString.erase(std::remove(stdString.begin(), stdString.end(), '\n'), stdString.end());
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *FString(stdString.c_str()));
+		return FString(stdString.c_str());
 	}
+
 
 #if WITH_EDITOR
 
