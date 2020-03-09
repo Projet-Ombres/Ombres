@@ -35,12 +35,12 @@ public:
 
 
 #if WITH_EDITOR
-
-
 	UFUNCTION(BlueprintCallable)
-	static void GenerateLevelArchitectureLOD(UStaticMesh* staticMesh) {
-		staticMesh->SetLODGroup(FName(TEXT("LevelArchitecture")));
+	static void SetLODGroup(UStaticMesh* staticMesh,FName LODGroup) {
+		staticMesh->SetLODGroup(LODGroup);
 	}
+
+
 
 	UFUNCTION(BlueprintCallable)
 	static UChildActorComponent* AddChildActor(AActor* target) {
