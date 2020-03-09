@@ -34,6 +34,12 @@ public:
 	}
 
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static const FString ConvertToUTF8(FString s) {
+		return TCHAR_TO_UTF8(*s);
+
+	}
+
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable)
 	static void SetLODGroup(UStaticMesh* staticMesh,FName LODGroup) {
@@ -85,6 +91,7 @@ public:
 	}
 #endif
 
+	
 
 
 };
