@@ -3,15 +3,21 @@
 
 #include "CustomTimeline.h"
 #include "Engine.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
+#include "Tickable.h"
 #include "Containers/UnrealString.h"
 
 
 
+UCustomTimeline::UCustomTimeline() {
+	running = false;
+}
+
 UCustomTimeline* UCustomTimeline::StartCustomTimeline(UObject* worldContextObject, float playRate,float startTime,float& outputValue,float& realDeltaTime,UCustomTimeline*& ref)
 {
 	UCustomTimeline* newTimeline = NewObject<UCustomTimeline>();
-	newTimeline->TickDelegate = FTickerDelegate::CreateUObject(newTimeline, &UCustomTimeline::Tick);
-	newTimeline->TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(newTimeline->TickDelegate);
+
 	newTimeline->WorldContextObject = worldContextObject;
 	newTimeline->World = GEngine->GetWorldFromContextObjectChecked(worldContextObject);
 	newTimeline->timerDuration = 1 / playRate;
@@ -33,7 +39,6 @@ void UCustomTimeline::FinishCustomTimeline(UObject* worldContextObject, UCustomT
 
 
 	if (IsValid(ref)) {
-		FTicker::GetCoreTicker().RemoveTicker(ref->TickDelegateHandle);
 		ref->running = false;
 		ref->Finished.Broadcast();
 	}
@@ -43,20 +48,19 @@ void UCustomTimeline::FinishCustomTimeline(UObject* worldContextObject, UCustomT
 void UCustomTimeline::StopCustomTimeline(UObject* worldContextObject, UCustomTimeline* ref)
 {
 	if (IsValid(ref)) {
-		FTicker::GetCoreTicker().RemoveTicker(ref->TickDelegateHandle);
 		ref->running = false;
+		
 	}
 }
 
-bool UCustomTimeline::Tick(float DeltaTime)
+void UCustomTimeline::Tick(float DeltaTime)
 {
 	//UE_LOG(LogTemp, Log, TEXT("name : %s"),*GetName());
-	if (!running) { return false; }
+	if (!running) { return; }
 
 	*realDeltaTime = DeltaTime;
 
 	*value += DeltaTime/timerDuration;
-
 
 
 	if (*value < 1) {
@@ -65,7 +69,33 @@ bool UCustomTimeline::Tick(float DeltaTime)
 	else {
 		FinishCustomTimeline(WorldContextObject, this);
 	}
-	return true;
+}
+
+bool UCustomTimeline::IsTickable() const
+{
+	return running;
+}
+
+bool UCustomTimeline::IsTickableInEditor() const
+{
+	return false;
+}
+
+bool UCustomTimeline::IsTickableWhenPaused() const
+{
+	return false;
+}
+
+
+
+TStatId UCustomTimeline::GetStatId() const
+{
+	return TStatId();
+}
+
+UWorld* UCustomTimeline::GetWorld() const
+{
+	return nullptr;
 }
 
 
