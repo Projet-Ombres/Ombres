@@ -35,8 +35,9 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-		static const FString ConvertToUTF8(FString s) {
-		return TCHAR_TO_UTF8(*s);
+	static const FString ConvertToUTF8(FString s) {
+		s.Replace(TEXT("u00e"), TEXT("\\u00e"));
+		return s;
 
 	}
 
