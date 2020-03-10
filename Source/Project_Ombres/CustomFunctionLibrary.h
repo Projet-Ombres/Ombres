@@ -34,13 +34,19 @@ public:
 	}
 
 
-#if WITH_EDITOR
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static const FString ConvertToUTF8(FString s) {
+		return TCHAR_TO_UTF8(*s);
 
-
-	UFUNCTION(BlueprintCallable)
-	static void GenerateLevelArchitectureLOD(UStaticMesh* staticMesh) {
-		staticMesh->SetLODGroup(FName(TEXT("LevelArchitecture")));
 	}
+
+#if WITH_EDITOR
+	UFUNCTION(BlueprintCallable)
+	static void SetLODGroup(UStaticMesh* staticMesh,FName LODGroup) {
+		staticMesh->SetLODGroup(LODGroup);
+	}
+
+
 
 	UFUNCTION(BlueprintCallable)
 	static UChildActorComponent* AddChildActor(AActor* target) {
@@ -85,6 +91,7 @@ public:
 	}
 #endif
 
+	
 
 
 };
