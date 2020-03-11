@@ -17,10 +17,14 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOutputPin);
  * 
  */
 UCLASS(BlueprintType)
-class PROJECT_OMBRES_API UCustomTimeline : public UBlueprintAsyncActionBase
+class PROJECT_OMBRES_API UCustomTimeline : public UBlueprintAsyncActionBase, public FTickableGameObject
 {
 	GENERATED_BODY()
 public:
+
+	UCustomTimeline();
+
+
 	UPROPERTY(BlueprintAssignable)
 	FOutputPin Update;
 	UPROPERTY(BlueprintAssignable)
@@ -28,7 +32,6 @@ public:
 	float* value;
 	int id;
 
-	FTimerHandle timerHandle;
 
 public:
 	/** Node to use as a timeline, but anywhere. Starts a timeline, to stop it permaturely, use the StopCustomTimeline node and give it the ref of this timeline.
@@ -55,6 +58,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Custom nodes")
 	bool IsRunning();
 
+	void Tick(float DeltaTime) override;
+	bool IsTickable() const override;
+	bool IsTickableInEditor() const override;
+	bool IsTickableWhenPaused() const override;
+
+	TStatId GetStatId() const override;
+	UWorld* GetWorld() const override;
+
 
 private:
 	UObject* WorldContextObject;
@@ -63,13 +74,11 @@ private:
 	bool running;
 	float* realDeltaTime;
 
-	/** Delegate for callbacks to Tick */
-	FTickerDelegate TickDelegate;
 
-	/** Handle to various registered delegates */
-	FDelegateHandle TickDelegateHandle;
 
-	bool Tick(float DeltaTime);
+	
+
+	
 
 
 };
