@@ -166,6 +166,12 @@ public:
 	UPROPERTY(EditAnywhere)
 		bool EnablePreviews;
 
+	UPROPERTY(EditAnywhere)
+		TArray<UStaticMesh*> SignsMeshes;
+
+	UPROPERTY(EditAnywhere)
+		TArray<UStaticMesh*> TilesMeshes;
+
 
 protected:
 	virtual void BeginPlay() override;

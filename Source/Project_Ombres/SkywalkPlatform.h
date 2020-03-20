@@ -120,7 +120,10 @@ public:
 	UCurveFloat* RotationCurve;
 
 	UPROPERTY()
-	TArray<UStaticMesh*> props;
+	TArray<UStaticMesh*> tiles;
+
+	UPROPERTY()
+	TArray<UStaticMesh*> signs;
 
 	UFUNCTION()
 		void CalculateCommonPositions();

@@ -37,7 +37,7 @@ USkywalkComponent::USkywalkComponent()
 	platformsToSpawnCount = 7;
 	WalkSpeed = 150;
 
-	VFXScale = FVector(0.2f, 0.2f, 0.2f);
+	VFXScale = FVector(0.3f, 0.3f, 0.3f);
 	VFXRotation = FRotator(0, 0, -90);
 
 	EnablePreviews = true;
@@ -52,6 +52,7 @@ USkywalkComponent::USkywalkComponent()
 	if (mat.Succeeded()) {
 		PreviewMaterial = mat.Object;
 	}
+
 }
 
 
@@ -130,8 +131,8 @@ void USkywalkComponent::StartSkyWalk()
 			LastPlatformPosition = Player->GetActorLocation();
 			currentTime = 0;
 
-			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(0, 0, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
-
+			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(-30, 30, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
+			spawnedVFX->bAutoDestroy = true;
 			SetComponentTickEnabled(true);
 			OnSkywalkStart.Broadcast();
 		}
@@ -156,7 +157,6 @@ void USkywalkComponent::EndSkyWalk()
 		OnCoolDown = true;
 
 		ScrapsInUse.Empty();
-		spawnedVFX->DestroyComponent();
 		
 		OnSkywalkEnd.Broadcast();
 	}
