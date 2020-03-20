@@ -52,6 +52,7 @@ USkywalkComponent::USkywalkComponent()
 	if (mat.Succeeded()) {
 		PreviewMaterial = mat.Object;
 	}
+
 }
 
 
@@ -131,7 +132,7 @@ void USkywalkComponent::StartSkyWalk()
 			currentTime = 0;
 
 			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(-30, 30, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
-
+			spawnedVFX->bAutoDestroy = true;
 			SetComponentTickEnabled(true);
 			OnSkywalkStart.Broadcast();
 		}
@@ -156,7 +157,6 @@ void USkywalkComponent::EndSkyWalk()
 		OnCoolDown = true;
 
 		ScrapsInUse.Empty();
-		spawnedVFX->DestroyComponent();
 		
 		OnSkywalkEnd.Broadcast();
 	}
