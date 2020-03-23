@@ -11,6 +11,7 @@
 #include "Misc/Char.h"
 #include <string>
 #include <algorithm>
+#include "StaticMeshResources.h"
 #include "CustomFunctionLibrary.generated.h"
 
 /**
@@ -22,6 +23,17 @@ class PROJECT_OMBRES_API UCustomFunctionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 	
 public:
+
+
+	UFUNCTION(BlueprintCallable)
+	static void SetLightmapResolution(UStaticMesh* StaticMesh,int Resolution) {
+		StaticMesh->LightMapResolution = Resolution;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	static void RebuildStaticMesh(UStaticMesh* StaticMesh) {
+		StaticMesh->Build();
+	}
 
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	static const FString CorrectJson(FString string) {
