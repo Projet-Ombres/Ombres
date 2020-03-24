@@ -12,6 +12,7 @@
 #include <string>
 #include <algorithm>
 #include "StaticMeshResources.h"
+#include "TimerManager.h"
 #include "CustomFunctionLibrary.generated.h"
 
 /**
@@ -34,6 +35,9 @@ public:
 	static void RebuildStaticMesh(UStaticMesh* StaticMesh) {
 		StaticMesh->Build();
 	}
+
+
+	
 
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	static const FString CorrectJson(FString string) {

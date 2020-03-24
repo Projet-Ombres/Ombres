@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Engine/StreamableManager.h"
+#include "Engine/LevelStreaming.h"
 #include "OmbresGameInstance.generated.h"
 
 /**
@@ -30,6 +31,8 @@ protected:
 	UFUNCTION()
 		virtual void EndLoadingScreen(UWorld* InLoadedWorld);
 
+	
+
 private:
 	UPROPERTY()
 		FTimerHandle timerHandle;
@@ -43,5 +46,34 @@ private:
 	UPROPERTY(BlueprintAssignable)
 		FBasicDelegate OnBaseLevelLoaded;
 
+	UPROPERTY()
+		TArray<AActor*> StreamLevelActors;
+
+	int streamLevelIndex;
+
+	FTimerHandle streamLevelTimerHandle;
+
+	UFUNCTION()
+		void ShowNextActor();
+
+	FStreamableManager Loader;
+
+	UPROPERTY()
+		ULevelStreaming* LevelToLoad;
+
+	UPROPERTY()
+		ULevel* LoadedLevel;
+
+	UPROPERTY()
+		FSoftObjectPath LevelSoftObjectPath;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void LoadStreamLevelAsync(ULevelStreaming* Level);
+
+	UFUNCTION()
+	void OnLevelLoaded();
+	
+	
 	
 };
