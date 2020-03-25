@@ -60,4 +60,55 @@ void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 	}
 }
 
+void UOmbresGameInstance::ShowNextActor()
+{
+	if (streamLevelIndex < StreamLevelActors.Num()) {
+		StreamLevelActors[streamLevelIndex]->bHidden = false;
+		streamLevelIndex++;
+	}
+	else {
+		GetWorld()->GetTimerManager().ClearTimer(streamLevelTimerHandle);
+	}
+	
+}
+
+void UOmbresGameInstance::LoadStreamLevelAsync(ULevelStreaming* Level)
+{
+	LevelToLoad = Level;
+
+	UE_LOG(LogTemp, Warning, TEXT("level path name : %s"), *LevelToLoad->PackageNameToLoad.ToString());
+	LevelSoftObjectPath = FSoftObjectPath(LevelToLoad->PackageNameToLoad.ToString());
+	Loader.RequestAsyncLoad(LevelSoftObjectPath, FStreamableDelegate::CreateUObject(this, &UOmbresGameInstance::OnLevelLoaded));
+
+
+	
+
+}
+
+void UOmbresGameInstance::OnLevelLoaded()
+{
+	if (LevelSoftObjectPath.ResolveObject()==nullptr) {
+		UE_LOG(LogTemp, Error, TEXT("object null"));
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("object not null"));
+	}
+	UE_LOG(LogTemp, Error, TEXT("uclass : %s"), *LevelSoftObjectPath.ResolveObject()->GetClass()->GetName());
+	
+	UE_LOG(LogTemp, Error, TEXT("contains map : %s"), Cast<UPackage>(LevelSoftObjectPath.ResolveObject())->ContainsMap()?TEXT("true"):TEXT("false"));
+	LoadedLevel = Cast<ULevel>(LevelSoftObjectPath.ResolveObject());
+
+	if (LoadedLevel != nullptr) {
+		StreamLevelActors = LoadedLevel->Actors;
+		streamLevelIndex = 0;
+
+		GetWorld()->GetTimerManager().SetTimer(streamLevelTimerHandle, this, &UOmbresGameInstance::ShowNextActor, 0.1f, true);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Level null"));
+	}
+	
+	
+}
+
 
