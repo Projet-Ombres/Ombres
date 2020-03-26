@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Engine/StreamableManager.h"
+#include "Engine/LevelStreaming.h"
 #include "OmbresGameInstance.generated.h"
 
 /**
@@ -30,6 +31,8 @@ protected:
 	UFUNCTION()
 		virtual void EndLoadingScreen(UWorld* InLoadedWorld);
 
+	
+
 private:
 	UPROPERTY()
 		FTimerHandle timerHandle;
@@ -42,6 +45,7 @@ private:
 
 	UPROPERTY(BlueprintAssignable)
 		FBasicDelegate OnBaseLevelLoaded;
+
 
 	
 };
