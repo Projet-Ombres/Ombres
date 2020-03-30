@@ -46,34 +46,6 @@ private:
 	UPROPERTY(BlueprintAssignable)
 		FBasicDelegate OnBaseLevelLoaded;
 
-	UPROPERTY()
-		TArray<AActor*> StreamLevelActors;
 
-	int streamLevelIndex;
-
-	FTimerHandle streamLevelTimerHandle;
-
-	UFUNCTION()
-		void ShowNextActor();
-
-	FStreamableManager Loader;
-
-	UPROPERTY()
-		ULevelStreaming* LevelToLoad;
-
-	UPROPERTY()
-		ULevel* LoadedLevel;
-
-	UPROPERTY()
-		FSoftObjectPath LevelSoftObjectPath;
-
-public:
-	UFUNCTION(BlueprintCallable)
-	void LoadStreamLevelAsync(ULevelStreaming* Level);
-
-	UFUNCTION()
-	void OnLevelLoaded();
-	
-	
 	
 };
