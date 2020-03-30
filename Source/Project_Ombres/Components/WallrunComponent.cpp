@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "DrawDebugHelpers.h"
 
 
 UWallrunComponent::UWallrunComponent()
@@ -27,6 +28,8 @@ UWallrunComponent::UWallrunComponent()
 	stopWallrunTolerance = 0.2f;
 	CameraRollTransitionDuration = 0.2f;
 	bIsDoingSomethingElse = false;
+
+	
 
 }
 
@@ -108,22 +111,21 @@ void UWallrunComponent::WallrunTracer()
 	FVector start = playerCharacter->GetActorForwardVector() * (-50) + playerHipsLocation;
 	FVector end = playerCharacter->GetActorRightVector() * (-SnapDistance) + playerHipsLocation + playerCharacter->GetActorForwardVector() * (-10);
 	
-	bool tracer1touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel13);
-	FVector normal1 = hitResult.ImpactNormal;
+	FCollisionQueryParams queryParam;
 
-	
+
+	bool tracer1touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel3,queryParam);
+	FVector normal1 = hitResult.ImpactNormal;
 
 
 	start = playerHipsLocation + playerCharacter->GetActorForwardVector() * 50;
 	end = playerHipsLocation + playerCharacter->GetActorRightVector() * (-SnapDistance) + playerCharacter->GetActorForwardVector() * 10;
 	
-	bool tracer2touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel13);
+	bool tracer2touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel3);
 	FVector normal2 = hitResult.ImpactNormal;
 
 	bInFrontOfWall = tracer1touched && tracer2touched && (UKismetMathLibrary::EqualEqual_VectorVector(normal1, normal2, 0.001f));
 
-	UE_LOG(LogTemp, Warning, TEXT("normal1 : %s"), *normal1.ToString());
-	UE_LOG(LogTemp, Warning, TEXT("normal2 : %s"), *normal2.ToString());
 
 	bool left=false;
 
@@ -132,13 +134,12 @@ void UWallrunComponent::WallrunTracer()
 	}else{
 		start= playerHipsLocation + playerCharacter->GetActorForwardVector() * (-50);
 		end = playerHipsLocation + playerCharacter->GetActorRightVector() * SnapDistance + playerCharacter->GetActorForwardVector() * (-10);
-		tracer1touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel13);
+		tracer1touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel3);
 		normal1 = hitResult.ImpactNormal;
-
 
 		start = playerHipsLocation + playerCharacter->GetActorForwardVector() * (50);
 		end = playerHipsLocation + playerCharacter->GetActorRightVector() * SnapDistance + playerCharacter->GetActorForwardVector() * (10);
-		tracer2touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel13);
+		tracer2touched = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel3);
 		normal2 = hitResult.ImpactNormal;
 
 		bInFrontOfWall = tracer1touched && tracer2touched && (UKismetMathLibrary::EqualEqual_VectorVector(normal1, normal2, 0.001f));
@@ -287,6 +288,7 @@ void UWallrunComponent::StartWallrun()
 	bJumpingOff = false;
 	bNeedToStopCurve = true;
 	bNeedToStopCameraUpdates = true;
+	wallrunLocalCurrentTime = 0;
 	wallrunStartPoint = playerCharacter->GetActorLocation();
 	bIsWallrunning = true;
 	playerCharacter->GetCharacterMovement()->GravityScale = 0;
