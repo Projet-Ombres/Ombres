@@ -11,7 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
-
+#include "ConstructorHelpers.h"
 
 UWallrunComponent::UWallrunComponent()
 {
@@ -29,8 +29,25 @@ UWallrunComponent::UWallrunComponent()
 	CameraRollTransitionDuration = 0.2f;
 	bIsDoingSomethingElse = false;
 
-	
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> heightCurve(TEXT("CurveFloat'/Game/BP/Curves/WallRunCurve.WallRunCurve'"));
+	if (heightCurve.Succeeded()) {
+		HeightCurve = heightCurve.Object;
+	}
 
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> speedCurve(TEXT("CurveFloat'/Game/BP/Curves/WallRunSpeed.WallRunSpeed'"));
+	if (speedCurve.Succeeded()) {
+		SpeedCurve = speedCurve.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> rollCurve(TEXT("CurveFloat'/Game/BP/Curves/CameraRollCurve.CameraRollCurve'"));
+	if (rollCurve.Succeeded()) {
+		CameraRollCurve = rollCurve.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UClass> cameraShake(TEXT("Blueprint'/Game/BP/FeedbackAssets/ScreenShakes/BP_CameraShake_Wallrun.BP_CameraShake_Wallrun_C'"));
+	if (cameraShake.Succeeded()) {
+		ScreenShake = cameraShake.Object;
+	}
 }
 
 
