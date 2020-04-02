@@ -316,6 +316,7 @@ void UWallrunComponent::StartWallrun()
 	FRotator bodyRotation = FVector(wallDirection.X, wallDirection.Y, 0).Rotation();
 
 	playerCharacter->GetCapsuleComponent()->SetWorldRotation(bodyRotation);
+	playerCharacter->bUseControllerRotationYaw = false;
 
 
 	OnWallrunStart.Broadcast();
