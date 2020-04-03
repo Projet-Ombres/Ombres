@@ -13,6 +13,9 @@
 #include <algorithm>
 #include "StaticMeshResources.h"
 #include "TimerManager.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "CustomFunctionLibrary.generated.h"
 
 /**
