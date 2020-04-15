@@ -212,8 +212,8 @@ public:
 private:
 	void HeightTracer();
 	
-	void CorrectHandPositions(float LeftHandYRotation, float RightHandYRotation,FVector& LeftHandPos,FVector& RightHandPos);
-	void CalculateHandRotations(float& LeftHandRotY, float& RightHandRotY);
+	void CorrectHandPositions(float LeftHandYRotation, float RightHandYRotation);
+	void CalculateHandRotations();
 	FVector CalculateClimbPosition();
 	void CalculateTracePoints();
 	FVector CalculateWallNormal();

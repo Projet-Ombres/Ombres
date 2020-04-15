@@ -150,11 +150,12 @@ void UWallClimbComponent::ClimbLedge()
 		playerController->SetControlRotation(FRotator(controlRotation.Pitch, (WallNormal * -1).ToOrientationRotator().Yaw, controlRotation.Roll));
 		wallrunComponent->StopWallrun();
 		wallrunComponent->bIsWallrunning = false;
-		OnLedgeClimb.Broadcast();
 		PlayerCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 		PlayerCharacter->GetCharacterMovement()->Velocity = FVector(0, 0, 0);
+		bIsEscalating = false;
 		bIsClimbingLedge = true;
 		CameraUp(false, 2);
+		OnLedgeClimb.Broadcast();
 	
 	}
 }
@@ -281,8 +282,8 @@ void UWallClimbComponent::HeightTracer()
 			//climb ledge
 			if ((canGrabLeft || canGrabRight) && !bIsClimbingLedge) {
 				
-				CalculateHandRotations(LeftHandRotY, RightHandRotY);
-				CorrectHandPositions(LeftHandRotY, RightHandRotY, LeftHandSpotToGrab, RightHandSpotToGrab);
+				CalculateHandRotations();
+				CorrectHandPositions(LeftHandRotY, RightHandRotY);
 			
 				if (PlayerCharacter->GetCharacterMovement()->IsFalling()) {
 					ClimbMontageStartTime = UKismetMathLibrary::FClamp(UKismetMathLibrary::Abs(CalculateClimbPosition().Z - PlayerCharacter->GetActorLocation().Z) / 200, 0, 1);
@@ -313,30 +314,30 @@ bool UWallClimbComponent::ClampCamera(float Value)
 	return (Value > 0 && Value + relativeRotationYaw < CameraAngleAllowed * 0.5f) || (Value < 0 && Value + relativeRotationYaw >= CameraAngleAllowed * -0.5f) || !bIsEscalating;
 }
 
-void UWallClimbComponent::CorrectHandPositions(float LeftHandYRotation, float RightHandYRotation, FVector& LeftHandPos, FVector& RightHandPos)
+void UWallClimbComponent::CorrectHandPositions(float LeftHandYRotation, float RightHandYRotation)
 {
 	if (LeftHandYRotation >= 0) {
-		LeftHandPos -= FVector(0,0,UKismetMathLibrary::Abs(LeftHandYRotation) * HandPositionCorrectionMultiplier);
+		LeftHandSpotToGrab -= FVector(0,0,UKismetMathLibrary::Abs(LeftHandYRotation) * HandPositionCorrectionMultiplier);
 	}
 	if (RightHandYRotation >= 0) {
-		RightHandPos -= FVector(0, 0, UKismetMathLibrary::Abs(RightHandYRotation) * HandPositionCorrectionMultiplier);
+		RightHandSpotToGrab -= FVector(0, 0, UKismetMathLibrary::Abs(RightHandYRotation) * HandPositionCorrectionMultiplier);
 	}
 
 	if (!rightHandTracerTriggered) {
-		RightHandPos = LeftHandPos + PlayerCharacter->GetActorRightVector() * OneHandCorrectionOffset;
+		RightHandSpotToGrab = LeftHandSpotToGrab + PlayerCharacter->GetActorRightVector() * OneHandCorrectionOffset;
 	}
 	else {
 		if (!leftHandTracerTriggered) {
-			LeftHandPos = RightHandPos + PlayerCharacter->GetActorRightVector() * -OneHandCorrectionOffset;
+			LeftHandSpotToGrab = RightHandSpotToGrab + PlayerCharacter->GetActorRightVector() * -OneHandCorrectionOffset;
 		}
 	}
 
 }
 
-void UWallClimbComponent::CalculateHandRotations(float& _LeftHandRotY, float& _RightHandRotY)
+void UWallClimbComponent::CalculateHandRotations()
 {
-	_LeftHandRotY = UKismetMathLibrary::DegAcos(FVector::DotProduct(FVector::UpVector, LeftHandNormal)) * -UKismetMathLibrary::SignOfFloat(FVector::DotProduct(LeftHandNormal, PlayerCharacter->GetActorRightVector()));
-	_RightHandRotY = UKismetMathLibrary::DegAcos(FVector::DotProduct(FVector::UpVector, RightHandNormal)) * UKismetMathLibrary::SignOfFloat(FVector::DotProduct(RightHandNormal, PlayerCharacter->GetActorRightVector()));
+	LeftHandRotY = UKismetMathLibrary::DegAcos(FVector::DotProduct(FVector::UpVector, LeftHandNormal)) * -UKismetMathLibrary::SignOfFloat(FVector::DotProduct(LeftHandNormal, PlayerCharacter->GetActorRightVector()));
+	RightHandRotY = UKismetMathLibrary::DegAcos(FVector::DotProduct(FVector::UpVector, RightHandNormal)) * UKismetMathLibrary::SignOfFloat(FVector::DotProduct(RightHandNormal, PlayerCharacter->GetActorRightVector()));
 }
 
 FVector UWallClimbComponent::CalculateClimbPosition()
