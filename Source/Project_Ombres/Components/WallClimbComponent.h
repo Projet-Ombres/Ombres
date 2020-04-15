@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Camera/CameraShake.h"
+#include "WallrunComponent.h"
+#include "SkywalkComponent.h"
 #include "WallClimbComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEscalateDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT_OMBRES_API UWallClimbComponent : public UActorComponent
@@ -17,7 +20,7 @@ public:
 	// Sets default values for this component's properties
 	UWallClimbComponent();
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	bool bIsEscalating;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -32,19 +35,19 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		FVector WallTopLocation;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 		float ClimbStartHeight;
 
 	UPROPERTY()
 		class ACharacter* PlayerCharacter;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 		bool bInFrontOfWall;
 
 	UPROPERTY(EditAnywhere)
 		float CameraAngleAllowed;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 		bool bIsPropulsed;
 
 	UPROPERTY(EditAnywhere)
@@ -69,19 +72,49 @@ public:
 		float CameraUpPitch;
 
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UCameraShake> CameraAnimation;
+		UCurveFloat* CameraUpCurve;
 
 	UPROPERTY(EditAnywhere)
 		float OneHandCorrectionOffset;
+
+	UPROPERTY(BlueprintReadOnly)
+	float LeftHandRotY;
+
+	UPROPERTY(BlueprintReadOnly)
+	float RightHandRotY;
+
+	UPROPERTY(BlueprintReadOnly)
+		float ClimbMontageStartTime;
+
+	UPROPERTY(BlueprintAssignable)
+		FEscalateDelegate OnEscalate;
+
+	UPROPERTY(BlueprintAssignable)
+		FEscalateDelegate OnLedgeClimb;
 	
+	UPROPERTY(BlueprintAssignable)
+		FEscalateDelegate OnClimbStop;
+
+	UPROPERTY(EditAnywhere)
+		float CameraYawRotationDuration;
+
+	UPROPERTY(EditAnywhere)
+		float CameraPitchRotationDuration;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector LeftHandSpotToGrab;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector RightHandSpotToGrab;
+
+
 private:
 		float PlayerYaw;
 		
 		bool leftHandTracerTriggered;
 		bool rightHandTracerTriggered;
-		FVector LeftHandSpotToGrab;
+		
 		FVector LeftHandNormal;
-		FVector RightHandSpotToGrab;
 		FVector RightHandNormal;
 		
 		UPROPERTY()
@@ -90,13 +123,50 @@ private:
 		bool bCanGrabRight;
 
 		bool bCancellingClimb;
+
+		bool applyingDecayingSpeed;
+
+		float DecayingSpeedTimeLeft;
+		
 	
 
 		FTimerHandle CancelClimbTimerHandle;
 
 		FVector LastNormal;
 		float CameraStartPitch;
+		float CameraTargetPitch;
+		float CameraStartYaw;
+		float CameraYawTarget;
 		bool bWasReset;
+
+		//for tracer
+		FVector StartTracePoint;
+		FVector EndTracePoint;
+
+		bool canGrabLeft;
+		bool canGrabRight;
+
+		UPROPERTY()
+			AActor* HitActor;
+
+		UPROPERTY()
+			APlayerCameraManager* CameraManager;
+
+		UPROPERTY()
+			USkywalkComponent* skywalkComponent;
+
+		UPROPERTY()
+			UWallrunComponent* wallrunComponent;
+
+		UPROPERTY()
+			APlayerController* playerController;
+
+		float CameraYawRotationTimeLeft;
+		bool bRotatingYaw;
+
+		float CameraPitchRotationTimeLeft;
+		bool bRotatingPitch;
+
 
 
 
@@ -108,5 +178,44 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	UFUNCTION(BlueprintCallable)
+		void EscalateWall();
+
+	UFUNCTION(BlueprintCallable)
+		void ClimbLedge();
+
+	UFUNCTION(BlueprintCallable)
+		void StopClimbing();
+
+	UFUNCTION(BlueprintCallable)
+		void DetachFromWall();
+
+	UFUNCTION(BlueprintCallable)
+		void CancelClimb();
+
+	UFUNCTION(BlueprintCallable)
+		void StopCancellingClimb();
+
+	UFUNCTION()
+		void Drop();
+
+	UFUNCTION(BlueprintCallable)
+		void CameraUp(bool CameraUp, float ResetTimeDilation);
+
+	UFUNCTION()
+		void RotateCameraYaw();
+
+	UFUNCTION(BlueprintCallable)
+		bool ClampCamera(float Value);
+
+
+private:
+	void HeightTracer();
+	
+	void CorrectHandPositions(float LeftHandYRotation, float RightHandYRotation,FVector& LeftHandPos,FVector& RightHandPos);
+	void CalculateHandRotations(float& LeftHandRotY, float& RightHandRotY);
+	FVector CalculateClimbPosition();
+	void CalculateTracePoints();
+	FVector CalculateWallNormal();
+	
 };
