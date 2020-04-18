@@ -34,7 +34,9 @@ void UOmbresGameInstance::EndLoadingScreen(UWorld* InLoadedWorld)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Loading Complete"));
 	for (int i = 0, l = StreamLevelsToLoad.Num(); i < l; i++) {
-		UGameplayStatics::LoadStreamLevel(GetWorld(), StreamLevelsToLoad[i], true, true, FLatentActionInfo());
+		FLatentActionInfo actionInfo;
+		actionInfo.UUID = i;
+		UGameplayStatics::LoadStreamLevel(GetWorld(), StreamLevelsToLoad[i], true, true, actionInfo);
 	}
 	OnBaseLevelLoaded.Broadcast();
 	GetWorld()->GetTimerManager().SetTimer(timerHandle,this, &UOmbresGameInstance::CheckIsLoadingSubLevels,1,true,1);
