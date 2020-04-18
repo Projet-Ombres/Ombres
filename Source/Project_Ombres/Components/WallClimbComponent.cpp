@@ -8,7 +8,6 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SkeletalMeshComponent.h"
-
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
 #include "ConstructorHelpers.h"
@@ -47,6 +46,7 @@ void UWallClimbComponent::BeginPlay()
 	wallrunComponent = Cast<UWallrunComponent>(PlayerCharacter->GetComponentByClass(UWallrunComponent::StaticClass()));
 	skywalkComponent = Cast<USkywalkComponent>(PlayerCharacter->GetComponentByClass(USkywalkComponent::StaticClass()));
 	playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	PlayerCamera = Cast<UCameraComponent>(PlayerCharacter->GetComponentByClass(UCameraComponent::StaticClass()));
 }
 
 
@@ -118,6 +118,7 @@ void UWallClimbComponent::EscalateWall()
 	
 	LastNormal = WallNormal;
 	PlayerCharacter->GetCharacterMovement()->GravityScale = 1;
+	PlayerCharacter->bUseControllerRotationYaw = false;
 	ClimbStartHeight = PlayerCharacter->GetActorLocation().Z;
 	bIsEscalating = true;
 
@@ -308,9 +309,8 @@ void UWallClimbComponent::HeightTracer()
 
 bool UWallClimbComponent::ClampCamera(float Value)
 {
-	FTransform cameraTransform = FTransform(CameraManager->GetCameraRotation(), CameraManager->GetCameraLocation(), FVector(1, 1, 1));
-	FTransform cameraRelativeTransform = UKismetMathLibrary::MakeRelativeTransform(cameraTransform, PlayerCharacter->GetActorTransform());
-	float relativeRotationYaw = cameraRelativeTransform.GetRotation().Z;
+	FTransform cameraTransform = PlayerCamera->GetComponentTransform();
+	float relativeRotationYaw = UKismetMathLibrary::MakeRelativeTransform(cameraTransform, PlayerCharacter->GetActorTransform()).GetRotation().Rotator().Yaw;
 	return (Value > 0 && Value + relativeRotationYaw < CameraAngleAllowed * 0.5f) || (Value < 0 && Value + relativeRotationYaw >= CameraAngleAllowed * -0.5f) || !bIsEscalating;
 }
 

@@ -33,8 +33,11 @@ void UOmbresGameInstance::BeginLoadingScreen(const FString& InMapName)
 void UOmbresGameInstance::EndLoadingScreen(UWorld* InLoadedWorld)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Loading Complete"));
+	for (int i = 0, l = StreamLevelsToLoad.Num(); i < l; i++) {
+		UGameplayStatics::LoadStreamLevel(GetWorld(), StreamLevelsToLoad[i], true, true, FLatentActionInfo());
+	}
 	OnBaseLevelLoaded.Broadcast();
-	GetWorld()->GetTimerManager().SetTimer(timerHandle,this, &UOmbresGameInstance::CheckIsLoadingSubLevels,1,true);
+	GetWorld()->GetTimerManager().SetTimer(timerHandle,this, &UOmbresGameInstance::CheckIsLoadingSubLevels,1,true,1);
 }
 
 
@@ -43,10 +46,10 @@ void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 	bool ready = true;
 	for (int i = 0, l = streamingLevels.Num(); i < l; i++) {
 		
-		if (streamingLevels[i]->HasLoadRequestPending()) {
+		if (streamingLevels[i]->HasLoadRequestPending() || streamingLevels[i]->IsStreamingStatePending()) {
 			ready = false;
 
-			UE_LOG(LogTemp, Warning, TEXT("Level streaming %i loading"), i);
+			UE_LOG(LogTemp, Warning, TEXT("Level streaming %s loading"), *streamingLevels[i]->GetName());
 			break;
 		}
 	}
