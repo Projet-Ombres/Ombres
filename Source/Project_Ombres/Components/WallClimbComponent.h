@@ -7,6 +7,7 @@
 #include "Camera/CameraShake.h"
 #include "WallrunComponent.h"
 #include "SkywalkComponent.h"
+#include "Camera/CameraComponent.h"
 #include "WallClimbComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEscalateDelegate);
@@ -167,6 +168,9 @@ private:
 		float CameraPitchRotationTimeLeft;
 		bool bRotatingPitch;
 
+
+		UPROPERTY()
+			UCameraComponent* PlayerCamera;
 
 
 
