@@ -31,6 +31,9 @@ protected:
 	UFUNCTION()
 		virtual void EndLoadingScreen(UWorld* InLoadedWorld);
 
+	UPROPERTY(BlueprintReadWrite)
+		TArray<FName> StreamLevelsToLoad;
+
 	
 
 private:
@@ -45,6 +48,7 @@ private:
 
 	UPROPERTY(BlueprintAssignable)
 		FBasicDelegate OnBaseLevelLoaded;
+
 
 
 	
