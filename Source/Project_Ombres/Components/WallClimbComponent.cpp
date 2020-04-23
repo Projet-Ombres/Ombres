@@ -268,7 +268,7 @@ void UWallClimbComponent::HeightTracer()
 		HitActor = hitResult.GetActor();
 	}
 
-	if (bInFrontOfWall = leftHandTracerTriggered && rightHandTracerTriggered) {
+	if (bInFrontOfWall = leftHandTracerTriggered || rightHandTracerTriggered) {
 		//calculate normals and hands positions
 		WallNormal = CalculateWallNormal();
 		FVector wallTangeant = WallNormal.RotateAngleAxis(-90, FVector(0, 0, 1)) * SideTracersOffset;
@@ -303,6 +303,11 @@ void UWallClimbComponent::HeightTracer()
 				}
 
 			}
+		}
+	}
+	else {
+		if (bIsEscalating) {
+			ClimbLedge();
 		}
 	}
 }
