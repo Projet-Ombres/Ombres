@@ -284,7 +284,7 @@ void UWallClimbComponent::HeightTracer()
 			if ((canGrabLeft || canGrabRight) && !bIsClimbingLedge) {
 				
 				CalculateHandRotations();
-				CorrectHandPositions(LeftHandRotY, RightHandRotY);
+				//CorrectHandPositions(LeftHandRotY, RightHandRotY);
 			
 				if (PlayerCharacter->GetCharacterMovement()->IsFalling()) {
 					ClimbMontageStartTime = UKismetMathLibrary::FClamp(UKismetMathLibrary::Abs(CalculateClimbPosition().Z - PlayerCharacter->GetActorLocation().Z) / 200, 0, 1);
