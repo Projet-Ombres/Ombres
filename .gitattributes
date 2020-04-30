@@ -1,1 +1,9 @@
 *.umap filter=lfs diff=lfs merge=lfs -text
+MENU_NOVX_MIX1.uasset filter=lfs diff=lfs merge=lfs -text
+MENU_VS_MIX1.uasset filter=lfs diff=lfs merge=lfs -text
+FILL_1.uasset filter=lfs diff=lfs merge=lfs -text
+FILL_2.uasset filter=lfs diff=lfs merge=lfs -text
+BEAT.uasset filter=lfs diff=lfs merge=lfs -text
+NAPPE.uasset filter=lfs diff=lfs merge=lfs -text
+HARMONIE.uasset filter=lfs diff=lfs merge=lfs -text
+ELECTRO.uasset filter=lfs diff=lfs merge=lfs -text
