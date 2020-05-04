@@ -6,6 +6,54 @@
 #include "Engine.h"
 #include "TimerManager.h"
 #include "Engine/AssetManager.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/Images/SThrobber.h"
+
+
+
+class SLoadingScreenWidget : public SCompoundWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SLoadingScreenWidget) {}
+	SLATE_END_ARGS()
+
+		void Construct(const FArguments& InArgs)
+	{
+		ChildSlot
+			[
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Center)
+			[
+				SNew(SThrobber)
+				.Visibility(this, &SLoadingScreenWidget::GetLoadIndicatorVisibility)
+			]
+		+ SVerticalBox::Slot()
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Center)
+			[
+				SNew(STextBlock)
+				.Text(NSLOCTEXT("MoviePlayerTestLoadingScreen", "LoadingComplete", "Loading complete!"))
+			.Visibility(this, &SLoadingScreenWidget::GetMessageIndicatorVisibility)
+			]
+			];
+	}
+
+private:
+	EVisibility GetLoadIndicatorVisibility() const
+	{
+		return GetMoviePlayer()->IsLoadingFinished() ? EVisibility::Collapsed : EVisibility::Visible;
+	}
+
+	EVisibility GetMessageIndicatorVisibility() const
+	{
+		return EVisibility::Visible;
+	}
+};
+
 
 void UOmbresGameInstance::Init()
 {
@@ -22,7 +70,7 @@ void UOmbresGameInstance::BeginLoadingScreen(const FString& InMapName)
 		FLoadingScreenAttributes LoadingScreen;
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
 		LoadingScreen.bMoviesAreSkippable = true;
-		LoadingScreen.WidgetLoadingScreen = FLoadingScreenAttributes::NewTestLoadingScreenWidget();
+		LoadingScreen.WidgetLoadingScreen = NewLoadingScreenWidget();
 		LoadingScreen.bWaitForManualStop = false;
 		
 
@@ -63,6 +111,11 @@ void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 
 		OnFullLevelLoaded.Broadcast();
 	}
+}
+
+TSharedRef<SWidget> UOmbresGameInstance::NewLoadingScreenWidget()
+{
+	return SNew(SLoadingScreenWidget);
 }
 
 
