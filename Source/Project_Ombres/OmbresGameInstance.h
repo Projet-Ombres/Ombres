@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Widgets/SWidget.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/LevelStreaming.h"
 #include "OmbresGameInstance.generated.h"
@@ -48,6 +49,9 @@ private:
 
 	UPROPERTY(BlueprintAssignable)
 		FBasicDelegate OnBaseLevelLoaded;
+
+
+	TSharedRef<SWidget> NewLoadingScreenWidget();
 
 
 
