@@ -20,6 +20,12 @@ class PROJECT_OMBRES_API UOmbresGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+public:
+		static UOmbresGameInstance* Instance;
+		UPROPERTY()
+			FName LoadingLevelName;
+		
+		UOmbresGameInstance(const FObjectInitializer& ObjectInitializer);
 
 
 protected:
@@ -38,11 +44,13 @@ protected:
 	
 
 private:
-	UPROPERTY()
-		FTimerHandle timerHandle;
+	FTimerHandle timerHandle;
+
+	
 
 	UFUNCTION()
 		void CheckIsLoadingSubLevels();
+
 
 	UPROPERTY(BlueprintAssignable)
 		FBasicDelegate OnFullLevelLoaded;
@@ -53,7 +61,9 @@ private:
 
 	TSharedRef<SWidget> NewLoadingScreenWidget();
 
-
+	UTexture2D* backgroundTexture1;
+	UTexture2D* backgroundTexture2;
+	UTexture2D* backgroundTexture3;
 
 	
 };
