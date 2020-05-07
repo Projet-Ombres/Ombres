@@ -55,13 +55,10 @@ void UCustomTimeline::StopCustomTimeline(UObject* worldContextObject, UCustomTim
 
 void UCustomTimeline::Tick(float DeltaTime)
 {
-	//UE_LOG(LogTemp, Log, TEXT("name : %s"),*GetName());
 	if (!running) { return; }
 
 	*realDeltaTime = DeltaTime;
-
 	*value += DeltaTime/timerDuration;
-
 
 	if (*value < 1) {
 		Update.Broadcast();
