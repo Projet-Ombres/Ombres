@@ -22,10 +22,19 @@ class PROJECT_OMBRES_API UOmbresGameInstance : public UGameInstance
 
 public:
 		static UOmbresGameInstance* Instance;
+
 		UPROPERTY()
-			FName LoadingLevelName;
+		FName LoadingLevelName;
 		
 		UOmbresGameInstance(const FObjectInitializer& ObjectInitializer);
+
+		UPROPERTY()
+		TArray<FText> LoadingScreenPhrases;
+
+		int randomPhraseIndex;
+
+		UFUNCTION()
+		FText GetCurrentPhrase() const;
 
 
 protected:
@@ -33,37 +42,38 @@ protected:
 	virtual void Init() override;
 
 	UFUNCTION()
-		virtual void BeginLoadingScreen(const FString& MapName);
+	virtual void BeginLoadingScreen(const FString& MapName);
 
 	UFUNCTION()
-		virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
 
 	UPROPERTY(BlueprintReadWrite)
-		TArray<FName> StreamLevelsToLoad;
+	TArray<FName> StreamLevelsToLoad;
 
 	
 
 private:
 	FTimerHandle timerHandle;
 
-	
+	FTimerHandle randomPhrasesTimerHandle;
 
 	UFUNCTION()
-		void CheckIsLoadingSubLevels();
-
-
-	UPROPERTY(BlueprintAssignable)
-		FBasicDelegate OnFullLevelLoaded;
+	void CheckIsLoadingSubLevels();
 
 	UPROPERTY(BlueprintAssignable)
-		FBasicDelegate OnBaseLevelLoaded;
+	FBasicDelegate OnFullLevelLoaded;
 
+	UPROPERTY(BlueprintAssignable)
+	FBasicDelegate OnBaseLevelLoaded;
 
 	TSharedRef<SWidget> NewLoadingScreenWidget();
 
-	UTexture2D* backgroundTexture1;
-	UTexture2D* backgroundTexture2;
-	UTexture2D* backgroundTexture3;
+	UPROPERTY()
+	TArray<class UTexture2D*> backgroundTextures;
 
+	
+
+	UFUNCTION()
+		void ChangeRandomPhrase();
 	
 };
