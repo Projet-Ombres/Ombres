@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Widgets/SWidget.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/LevelStreaming.h"
 #include "OmbresGameInstance.generated.h"
@@ -19,6 +20,21 @@ class PROJECT_OMBRES_API UOmbresGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+public:
+		static UOmbresGameInstance* Instance;
+
+		UPROPERTY()
+		FName LoadingLevelName;
+		
+		UOmbresGameInstance(const FObjectInitializer& ObjectInitializer);
+
+		UPROPERTY()
+		TArray<FText> LoadingScreenPhrases;
+
+		int randomPhraseIndex;
+
+		UFUNCTION()
+		FText GetCurrentPhrase() const;
 
 
 protected:
@@ -26,26 +42,38 @@ protected:
 	virtual void Init() override;
 
 	UFUNCTION()
-		virtual void BeginLoadingScreen(const FString& MapName);
+	virtual void BeginLoadingScreen(const FString& MapName);
 
 	UFUNCTION()
-		virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FName> StreamLevelsToLoad;
 
 	
 
 private:
-	UPROPERTY()
-		FTimerHandle timerHandle;
+	FTimerHandle timerHandle;
+
+	FTimerHandle randomPhrasesTimerHandle;
 
 	UFUNCTION()
-		void CheckIsLoadingSubLevels();
+	void CheckIsLoadingSubLevels();
 
 	UPROPERTY(BlueprintAssignable)
-		FBasicDelegate OnFullLevelLoaded;
+	FBasicDelegate OnFullLevelLoaded;
 
 	UPROPERTY(BlueprintAssignable)
-		FBasicDelegate OnBaseLevelLoaded;
+	FBasicDelegate OnBaseLevelLoaded;
 
+	TSharedRef<SWidget> NewLoadingScreenWidget();
 
+	UPROPERTY()
+	TArray<class UTexture2D*> backgroundTextures;
+
+	
+
+	UFUNCTION()
+		void ChangeRandomPhrase();
 	
 };
