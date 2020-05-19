@@ -106,11 +106,27 @@ void UWallClimbComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 			bRotatingPitch = false;
 		}
 	}
+
+
+
+	if (bCancellingClimb) {
+		cancelCurrentTime += DeltaTime;
+		if (cancelCurrentTime > 0.3f) {
+			cancelCurrentTime = 0;
+			Drop();
+		}
+	}
+	else {
+		cancelCurrentTime = 0;
+	}
+	
 	
 }
 
 void UWallClimbComponent::EscalateWall()
 {
+	HeightToClimb= UKismetMathLibrary::Abs(locationHit.Z - PlayerCharacter->GetActorLocation().Z);
+	UE_LOG(LogTemp, Warning, TEXT("height to climb : %f"), HeightToClimb);
 	wallrunComponent->bIsDoingSomethingElse = true;
 	bWasReset = false;
 	CameraUp(true, 10);
@@ -146,6 +162,7 @@ void UWallClimbComponent::EscalateWall()
 
 void UWallClimbComponent::ClimbLedge()
 {
+	UE_LOG(LogTemp, Warning, TEXT("climb start time : %f"), ClimbMontageStartTime);
 	if (!bIsClimbingLedge) {
 		FRotator controlRotation = playerController->GetControlRotation();
 		playerController->SetControlRotation(FRotator(controlRotation.Pitch, (WallNormal * -1).ToOrientationRotator().Yaw, controlRotation.Roll));
@@ -158,6 +175,20 @@ void UWallClimbComponent::ClimbLedge()
 		CameraUp(false, 2);
 		OnLedgeClimb.Broadcast();
 	
+	}
+}
+
+void UWallClimbComponent::CancelClimb()
+{
+	if (!bCancellingClimb) {
+		bCancellingClimb = true;
+	}
+}
+
+void UWallClimbComponent::StopCancellingClimb()
+{
+	if (bCancellingClimb) {
+		bCancellingClimb = false;
 	}
 }
 
@@ -181,23 +212,12 @@ void UWallClimbComponent::DetachFromWall()
 	wallrunComponent->bIsDoingSomethingElse = true;
 }
 
-void UWallClimbComponent::CancelClimb()
-{
-	if (!bCancellingClimb) {
-		GetWorld()->GetTimerManager().SetTimer(CancelClimbTimerHandle, this, &UWallClimbComponent::Drop, CancelTime, false);
-	}
-}
 
-void UWallClimbComponent::StopCancellingClimb()
-{
-	if (bCancellingClimb) {
-		GetWorld()->GetTimerManager().ClearTimer(CancelClimbTimerHandle);
-		bCancellingClimb = false;
-	}
-}
+
 
 void UWallClimbComponent::Drop()
 {
+	
 	DetachFromWall();
 	bCancellingClimb = false;
 	bIsPropulsed = true;
@@ -253,6 +273,7 @@ void UWallClimbComponent::HeightTracer()
 		RightHandNormal = hitResult.ImpactNormal;
 		canGrabRight = RightHandNormal.Z > 0.8f;
 		HitActor = hitResult.GetActor();
+		locationHit = hitResult.Location;
 	}
 
 	
@@ -266,6 +287,7 @@ void UWallClimbComponent::HeightTracer()
 		LeftHandNormal = hitResult.ImpactNormal;
 		canGrabLeft = LeftHandNormal.Z > 0.8f;
 		HitActor = hitResult.GetActor();
+		locationHit = hitResult.Location;
 	}
 
 	if (bInFrontOfWall = leftHandTracerTriggered || rightHandTracerTriggered) {
@@ -286,9 +308,10 @@ void UWallClimbComponent::HeightTracer()
 				CalculateHandRotations();
 				//CorrectHandPositions(LeftHandRotY, RightHandRotY);
 			
-				if (PlayerCharacter->GetCharacterMovement()->IsFalling()) {
-					ClimbMontageStartTime = UKismetMathLibrary::FClamp(UKismetMathLibrary::Abs(CalculateClimbPosition().Z - PlayerCharacter->GetActorLocation().Z) / 200, 0, 1);
-				}
+				
+				
+				ClimbMontageStartTime = UKismetMathLibrary::FClamp(HeightToClimb < 200 ? (1- HeightToClimb/200) : 0,0,0.75f);
+				
 				ClimbLedge();
 
 			}
@@ -307,6 +330,7 @@ void UWallClimbComponent::HeightTracer()
 	}
 	else {
 		if (bIsEscalating) {
+			ClimbMontageStartTime = UKismetMathLibrary::FClamp(HeightToClimb < 200 ? (1 - HeightToClimb / 200) : 0, 0, 0.75f);
 			ClimbLedge();
 		}
 	}
@@ -354,7 +378,7 @@ FVector UWallClimbComponent::CalculateClimbPosition()
 void UWallClimbComponent::CalculateTracePoints()
 {
 	EndTracePoint = PlayerCharacter->GetActorLocation() + PlayerCharacter->GetActorForwardVector() * 75;
-	StartTracePoint = EndTracePoint + FVector(0, 0, 110);
+	StartTracePoint = EndTracePoint + FVector(0, 0, 200);
 }
 
 FVector UWallClimbComponent::CalculateWallNormal()
