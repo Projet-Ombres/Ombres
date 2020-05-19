@@ -108,6 +108,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	FVector RightHandSpotToGrab;
 
+	UPROPERTY(BlueprintReadOnly)
+		float HeightToClimb;
+
 
 private:
 		float PlayerYaw;
@@ -132,6 +135,7 @@ private:
 	
 
 		FTimerHandle CancelClimbTimerHandle;
+		float cancelCurrentTime;
 
 		FVector LastNormal;
 		float CameraStartPitch;
@@ -143,6 +147,8 @@ private:
 		//for tracer
 		FVector StartTracePoint;
 		FVector EndTracePoint;
+
+		FVector locationHit;
 
 		bool canGrabLeft;
 		bool canGrabRight;
