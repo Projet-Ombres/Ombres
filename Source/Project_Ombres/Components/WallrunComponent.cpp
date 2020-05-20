@@ -340,6 +340,15 @@ void UWallrunComponent::StopWallrun()
 	}
 }
 
+void UWallrunComponent::StopWallrunInstantly() {
+	if (bIsWallrunning) {
+		EndWallrun();
+		SetCameraRoll(0);
+		bIsWallrunning = false;
+		
+	}
+}
+
 void UWallrunComponent::UpdateCameraRoll(float Value)
 {
 	SetCameraRoll(CameraRollCurve->GetFloatValue(Value));
