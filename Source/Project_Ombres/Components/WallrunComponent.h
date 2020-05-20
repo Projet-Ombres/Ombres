@@ -141,6 +141,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void StopWallrun();
+	
+	UFUNCTION(BlueprintCallable)
+	void StopWallrunInstantly();
 
 	UFUNCTION(BlueprintCallable)
 		void JumpOffWall();
