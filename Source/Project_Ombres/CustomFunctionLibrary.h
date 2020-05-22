@@ -40,6 +40,9 @@ public:
 	}
 
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "GamepadConnected"), Category = "System Information")
+		static bool IsGamePadConnected();
+
 	
 
 	UFUNCTION(BlueprintCallable,BlueprintPure)
