@@ -306,7 +306,7 @@ void UWallClimbComponent::HeightTracer()
 			if ((canGrabLeft || canGrabRight) && !bIsClimbingLedge) {
 				
 				CalculateHandRotations();
-				//CorrectHandPositions(LeftHandRotY, RightHandRotY);
+				CorrectHandPositions(LeftHandRotY, RightHandRotY);
 			
 				
 				
