@@ -41,10 +41,10 @@ protected:
 
 	virtual void Init() override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void BeginLoadingScreen(const FString& MapName);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
 
 	UPROPERTY(BlueprintReadWrite)
