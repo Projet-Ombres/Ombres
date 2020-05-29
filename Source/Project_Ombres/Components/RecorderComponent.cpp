@@ -165,10 +165,13 @@ void URecorderComponent::StartNewRecording()
 
 void URecorderComponent::PauseRecording()
 {
-	bRecording = false;
-	SetComponentTickEnabled(false);
-	GetWorld()->GetTimerManager().ClearTimer(timerHandle);
-	WriteToFile();
+	if (bRecording) {
+		bRecording = false;
+		SetComponentTickEnabled(false);
+		GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+		WriteToFile();
+	}
+	
 }
 
 
@@ -176,13 +179,14 @@ void URecorderComponent::PauseRecording()
 
 void URecorderComponent::ResumeRecording()
 {
-	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &URecorderComponent::WriteToFile, WriteToFileInterval, true);
+	if (!bRecording) {
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &URecorderComponent::WriteToFile, WriteToFileInterval, true);
 
+		PrimaryComponentTick.bCanEverTick = true;
+		bRecording = true;
+		SetComponentTickEnabled(true);
+	}
 	
-
-	PrimaryComponentTick.bCanEverTick = true;
-	bRecording = true;
-	SetComponentTickEnabled(true);
 }
 
 
