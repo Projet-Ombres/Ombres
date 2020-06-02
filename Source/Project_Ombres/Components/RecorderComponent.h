@@ -19,6 +19,7 @@ private:
 
 	FString FrameEvents;
 
+	UPROPERTY()
 	float frameTime;
 
 	FTimerHandle timerHandle;

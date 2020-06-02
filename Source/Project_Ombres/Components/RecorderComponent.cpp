@@ -15,6 +15,7 @@ URecorderComponent::URecorderComponent()
 
 	PrimaryComponentTick.bCanEverTick = true;
 	bRecording = false;
+	bPlayingBack = false;
 	SetComponentTickEnabled(false);
 	WriteToFileInterval = 1;
 }
@@ -24,20 +25,24 @@ URecorderComponent::URecorderComponent()
 void URecorderComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	bRecording = false;
+	bPlayingBack = false;
+	SetComponentTickEnabled(false);
 }
 
 
 
 void URecorderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	frameTime += DeltaTime;
+	
 	if (bPlayingBack) {
+		frameTime += GetWorld()->GetDeltaSeconds();
+		UE_LOG(LogTemp, Warning, TEXT("frame time : %f"), frameTime);
+		UE_LOG(LogTemp, Warning, TEXT("DELTA TIME: %f"), GetWorld()->GetDeltaSeconds());
 		CheckProgress();
 	}
 	else if (bRecording) {
-
+		frameTime += DeltaTime;
 		if (!FrameEvents.IsEmpty()) {
 			FString finalString = FString::SanitizeFloat(frameTime) + ":" + FrameEvents;
 			FramesEvents.Add(finalString);
@@ -45,7 +50,7 @@ void URecorderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		}
 	}
 	
-	
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
 }
 
@@ -179,12 +184,16 @@ void URecorderComponent::GetRidOfOldFiles()
 
 void URecorderComponent::StartNewRecording(int checkpointId)
 {
-	GetRidOfOldFiles();
-	SaveFileName = FPaths::MakeValidFileName(FDateTime::Now().ToString())+".txt";
-	FString fileFullPath = FPaths::ProjectDir() + "/Records/" + SaveFileName;
-	FFileHelper::SaveStringToFile("Lvl[" + GetWorld()->GetName() + "](" + FString::FromInt(checkpointId) + ");Pos["+UGameplayStatics::GetPlayerCharacter(GetWorld(),0)->GetActorLocation().ToCompactString() + "]" LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
-	recordingPaused = true;
-	ResumeRecording();
+	if (!bPlayingBack) {
+		UE_LOG(LogTemp, Warning, TEXT("STARTED NEW RECORDING"));
+		GetRidOfOldFiles();
+		SaveFileName = FPaths::MakeValidFileName(FDateTime::Now().ToString()) + ".txt";
+		FString fileFullPath = FPaths::ProjectDir() + "/Records/" + SaveFileName;
+		FFileHelper::SaveStringToFile("Lvl[" + GetWorld()->GetName() + "](" + FString::FromInt(checkpointId) + ");Pos[" + UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation().ToCompactString() + "]" LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+		recordingPaused = true;
+		ResumeRecording();
+	}
+	
 }
 
 void URecorderComponent::PlayBack(TArray<FString> RecordContent)
@@ -249,7 +258,7 @@ void URecorderComponent::CheckProgress()
 	FString events;
 	ContentToPlay[ContentCurrentIndex].Split(":", &timeAsString, &events);
 	UE_LOG(LogTemp, Warning, TEXT("recorded time : %s"), *timeAsString);
-	UE_LOG(LogTemp, Warning, TEXT("frame time : %f"), frameTime);
+	
 	recordedTime = FCString::Atof(*timeAsString);
 	if (recordedTime < frameTime) {
 		PlayEvents(events);
@@ -276,7 +285,8 @@ void URecorderComponent::PauseRecording()
 
 void URecorderComponent::ResumeRecording()
 {
-	if (!bRecording && recordingPaused) {
+	if (!bRecording && recordingPaused && !bPlayingBack) {
+		UE_LOG(LogTemp, Warning, TEXT("RESUME RECORDING"));
 		GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &URecorderComponent::WriteToFile, WriteToFileInterval, true);
 
 		bRecording = true;
