@@ -13,3 +13,48 @@ bool UCustomFunctionLibrary::IsGamePadConnected()
 	}
 	return false;
 }
+
+
+TArray<FString> UCustomFunctionLibrary::GetRecordContent(FString FileName) {
+	FString directoryPath = FPaths::ProjectDir() + "Records";
+	FJsonSerializableArray content;
+	FString fileFullName = FPaths::ProjectDir() + "/Records/" + FileName;
+	FFileHelper::LoadFileToStringArray(content, *fileFullName);
+	return content;
+}
+
+TArray<FRecordInfo> UCustomFunctionLibrary::GetRecordsInfo()
+{
+	FString directoryPath = FPaths::ProjectDir() + "Records";
+	TArray<FString> fileNames;
+	if (FPaths::DirectoryExists(directoryPath)) {
+		IFileManager::Get().FindFiles(fileNames, *directoryPath);
+	};
+
+	TArray<FRecordInfo> recordsInfo;
+
+	for (int i = 0, l = fileNames.Num(); i < l; i++) {
+		FJsonSerializableArray content;
+		FString fileFullName = FPaths::ProjectDir() + "/Records/" + fileNames[i];
+		FFileHelper::LoadFileToStringArray(content, *fileFullName);
+		FString firstLine = content[0];
+		FString levelName;
+		firstLine.Split(TEXT("Lvl["), new FString(), &levelName);
+		FString checkpointId;
+		levelName.Split(TEXT("]("), &levelName, &checkpointId);
+		checkpointId.Split(TEXT(")"), &checkpointId, new FString());
+		
+
+		FDateTime fileDate = IFileManager::Get().GetTimeStamp(*fileFullName);
+
+		FRecordInfo recordInfo;
+		recordInfo.Date = fileDate;
+		recordInfo.LevelName = levelName;
+		recordInfo.FileName = fileNames[i];
+		recordInfo.CheckpointId = FCString::Atoi(*checkpointId);
+
+		recordsInfo.Add(recordInfo);
+	}
+	
+	return recordsInfo;
+}

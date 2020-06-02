@@ -18,6 +18,25 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "CustomFunctionLibrary.generated.h"
 
+USTRUCT(BlueprintType)
+struct FRecordInfo {
+	GENERATED_BODY()
+	FRecordInfo() {
+		LevelName = "None";
+		CheckpointId = -1;
+		Date = FDateTime();
+		FileName = "None";
+	}
+	UPROPERTY(BlueprintReadWrite)
+	FString LevelName;
+	UPROPERTY(BlueprintReadWrite)
+	FDateTime Date;
+	UPROPERTY(BlueprintReadWrite)
+	FString FileName;
+	UPROPERTY(BlueprintReadWrite)
+	int CheckpointId;
+};
+
 /**
  * 
  */
@@ -28,6 +47,9 @@ class PROJECT_OMBRES_API UCustomFunctionLibrary : public UBlueprintFunctionLibra
 	
 public:
 
+
+	UFUNCTION(BlueprintCallable)
+		static TArray<FString> GetRecordContent(FString FileName);
 
 	UFUNCTION(BlueprintCallable)
 	static void SetLightmapResolution(UStaticMesh* StaticMesh,int Resolution) {
@@ -43,6 +65,8 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "GamepadConnected"), Category = "System Information")
 		static bool IsGamePadConnected();
 
+	UFUNCTION(BlueprintCallable)
+		static TArray<FRecordInfo> GetRecordsInfo();
 	
 
 	UFUNCTION(BlueprintCallable,BlueprintPure)
