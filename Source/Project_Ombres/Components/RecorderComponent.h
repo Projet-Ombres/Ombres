@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "RecorderComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementDelegate,float,InputValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT_OMBRES_API URecorderComponent : public UActorComponent
@@ -18,6 +19,7 @@ private:
 
 	FString FrameEvents;
 
+	UPROPERTY()
 	float frameTime;
 
 	FTimerHandle timerHandle;
@@ -25,6 +27,9 @@ private:
 	UFUNCTION()
 		void WriteToFile();
 
+	bool recordingPaused;
+
+	
 
 public:	
 	// Sets default values for this component's properties
@@ -90,11 +95,40 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		bool bRecording;
 
+	UPROPERTY(BlueprintReadOnly)
+		bool bPlayingBack;
+
 	UFUNCTION(BlueprintCallable)
-		void StartNewRecording();
+		void StartNewRecording(int checkpointId);
 
+	UFUNCTION(BlueprintCallable)
+		void PlayBack(TArray<FString> RecordContent);
 
+	UPROPERTY()
+		TArray<FString> ContentToPlay;
 
+	UPROPERTY()
+		int ContentCurrentIndex;
 
+	UFUNCTION()
+		void PlayEvents(FString events);
+
+	UFUNCTION()
+		void PlayEvent(FString event);
+
+	UFUNCTION()
+		void CheckProgress();
+
+	UPROPERTY(BlueprintAssignable)
+		FMovementDelegate OnMoveForwardRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FMovementDelegate OnMoveRightRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FMovementDelegate OnRotationYawRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FMovementDelegate OnRotationPitchRequest;
 		
 };
