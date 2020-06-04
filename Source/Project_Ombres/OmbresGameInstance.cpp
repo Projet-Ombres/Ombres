@@ -193,16 +193,12 @@ void UOmbresGameInstance::BeginLoadingScreen(const FString& InMapName)
 	if (!IsRunningDedicatedServer())
 	{
 		LoadingLevelName = FName(*InMapName);
-		FLoadingScreenAttributes LoadingScreen;
-		LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
-		LoadingScreen.bMoviesAreSkippable = true;
-		LoadingScreen.WidgetLoadingScreen = NewLoadingScreenWidget();
-		LoadingScreen.bWaitForManualStop = false;
 		
+		DisplayLoadingScreen();
 		//on change la phrase toutes les 5 secondes
 		GetTimerManager().SetTimer(randomPhrasesTimerHandle, this, &UOmbresGameInstance::ChangeRandomPhrase, 5, true);
 
-		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
+		
 
 	}
 }
@@ -230,6 +226,21 @@ void UOmbresGameInstance::EndLoadingScreen(UWorld* InLoadedWorld)
 	GetWorld()->GetTimerManager().SetTimer(timerHandle,this, &UOmbresGameInstance::CheckIsLoadingSubLevels,1,true,1);
 }
 
+void UOmbresGameInstance::DisplayLoadingScreen()
+{
+	FLoadingScreenAttributes LoadingScreen;
+	LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
+	LoadingScreen.bMoviesAreSkippable = true;
+	LoadingScreen.WidgetLoadingScreen = NewLoadingScreenWidget();
+	LoadingScreen.bWaitForManualStop = false;
+	GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
+}
+
+void UOmbresGameInstance::HideLoadingScreen()
+{
+	GetMoviePlayer()->PassLoadingScreenWindowBackToGame();
+}
+
 
 void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 	TArray<ULevelStreaming*> streamingLevels= GetWorld()->GetStreamingLevels();
@@ -243,7 +254,7 @@ void UOmbresGameInstance::CheckIsLoadingSubLevels() {
 	}
 
 	if (ready) {
-		GetMoviePlayer()->PassLoadingScreenWindowBackToGame();
+		HideLoadingScreen();
 		GetWorld()->GetTimerManager().ClearTimer(timerHandle);
 		OnFullLevelLoaded.Broadcast();
 	}

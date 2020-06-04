@@ -7,6 +7,7 @@
 #include "RecorderComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementDelegate,float,InputValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRecordDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT_OMBRES_API URecorderComponent : public UActorComponent
@@ -28,6 +29,12 @@ private:
 		void WriteToFile();
 
 	bool recordingPaused;
+
+	UPROPERTY()
+		ACharacter* playerCharacter;
+
+	UPROPERTY()
+		APlayerController* playerController;
 
 	
 
@@ -68,7 +75,10 @@ public:
 		void RecordPing();
 
 	UFUNCTION(BlueprintCallable)
-		void RecordCrystallization();
+		void RecordCrystallizationPressed();
+
+	UFUNCTION(BlueprintCallable)
+		void RecordCrystallizationReleased();
 
 	UFUNCTION(BlueprintCallable)
 		void Record180();
@@ -119,6 +129,30 @@ public:
 	UFUNCTION()
 		void CheckProgress();
 
+	UFUNCTION(BlueprintCallable)
+		float GetCurrentRecordDuration();
+
+
+	
+
+
+		FString GetStringByTag(FString events, FString Tag);
+
+	UFUNCTION()
+		FString GetStringByTag(TArray<FString> eventsArray, FString Tag);
+
+
+		float GetFloatByTag(FString events, FString Tag);
+
+	UFUNCTION()
+		float GetFloatByTag(TArray<FString> eventsArray, FString Tag);
+
+
+		FVector GetVectorByTag(FString events, FString Tag);
+
+	UFUNCTION()
+		FVector GetVectorByTag(TArray<FString> eventsArray, FString Tag);
+
 	UPROPERTY(BlueprintAssignable)
 		FMovementDelegate OnMoveForwardRequest;
 
@@ -130,5 +164,26 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 		FMovementDelegate OnRotationPitchRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FRecordDelegate OnJumpRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FRecordDelegate OnPingRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FRecordDelegate OnSkywalkRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FRecordDelegate OnCrystallizationPressedRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FRecordDelegate OnCrystallizationReleasedRequest;
+
+	UPROPERTY(BlueprintAssignable)
+		FRecordDelegate On180Request;
+
+	UPROPERTY(BlueprintAssignable)
+		FRecordDelegate OnSlideRequest;
 		
 };

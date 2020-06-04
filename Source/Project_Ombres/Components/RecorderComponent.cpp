@@ -8,6 +8,7 @@
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 URecorderComponent::URecorderComponent()
@@ -28,6 +29,9 @@ void URecorderComponent::BeginPlay()
 	bRecording = false;
 	bPlayingBack = false;
 	SetComponentTickEnabled(false);
+
+	playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
 
@@ -37,12 +41,11 @@ void URecorderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	
 	if (bPlayingBack) {
 		frameTime += GetWorld()->GetDeltaSeconds();
-		UE_LOG(LogTemp, Warning, TEXT("frame time : %f"), frameTime);
-		UE_LOG(LogTemp, Warning, TEXT("DELTA TIME: %f"), GetWorld()->GetDeltaSeconds());
 		CheckProgress();
 	}
 	else if (bRecording) {
 		frameTime += DeltaTime;
+
 		if (!FrameEvents.IsEmpty()) {
 			FString finalString = FString::SanitizeFloat(frameTime) + ":" + FrameEvents;
 			FramesEvents.Add(finalString);
@@ -112,10 +115,16 @@ void URecorderComponent::RecordPing()
 	}
 }
 
-void URecorderComponent::RecordCrystallization()
+void URecorderComponent::RecordCrystallizationPressed()
 {
 	if (bRecording) {
-		FrameEvents += "Cry;";
+		FrameEvents += "CryP;";
+	}
+}
+
+void URecorderComponent::RecordCrystallizationReleased() {
+	if (bRecording) {
+		FrameEvents += "CryR";
 	}
 }
 
@@ -189,7 +198,7 @@ void URecorderComponent::StartNewRecording(int checkpointId)
 		GetRidOfOldFiles();
 		SaveFileName = FPaths::MakeValidFileName(FDateTime::Now().ToString()) + ".txt";
 		FString fileFullPath = FPaths::ProjectDir() + "/Records/" + SaveFileName;
-		FFileHelper::SaveStringToFile("Lvl[" + GetWorld()->GetName() + "](" + FString::FromInt(checkpointId) + ");Pos[" + UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation().ToCompactString() + "]" LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+		FFileHelper::SaveStringToFile("Lvl[" + GetWorld()->GetName() + "](" + FString::FromInt(checkpointId) + ");Pos[" +playerCharacter->GetActorLocation().ToCompactString() + "];RotY["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];RotP["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];Vel["+playerCharacter->GetVelocity().ToCompactString()+"];" +LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 		recordingPaused = true;
 		ResumeRecording();
 	}
@@ -204,6 +213,22 @@ void URecorderComponent::PlayBack(TArray<FString> RecordContent)
 	bRecording = false;
 	ContentToPlay = RecordContent;
 	SetComponentTickEnabled(true);
+
+
+	//setup player chara at the starting position, rotation and velocity
+	FString firstLine = ContentToPlay[0];
+	TArray<FString> firstLineEvents;
+	firstLine.ParseIntoArray(firstLineEvents, TEXT(";"));
+	FVector playerInitialPosition = GetVectorByTag(firstLineEvents, "Pos");
+	float playerInitialYaw = GetFloatByTag(firstLineEvents, "RotY");
+	float playerInitialPitch = GetFloatByTag(firstLineEvents, "RotP");
+	FVector playerInitialVeloctity = GetVectorByTag(firstLineEvents, "Vel");
+
+	bool s = playerCharacter->SetActorLocation(playerInitialPosition);
+	UE_LOG(LogTemp, Warning, TEXT("initial location successful : %s"), s ? TEXT("true") : TEXT("false"));
+	playerCharacter->GetCharacterMovement()->Velocity = playerInitialVeloctity;
+	playerController->SetControlRotation(FRotator(playerInitialPitch, playerInitialYaw, 0));
+
 	UE_LOG(LogTemp, Warning, TEXT("Playback started"));
 }
 
@@ -247,24 +272,186 @@ void URecorderComponent::PlayEvent(FString event) {
 		OnRotationPitchRequest.Broadcast(FCString::Atof(*inputValue));
 	}
 	else if (event.StartsWith(TEXT("Jum"))) {
-		//call jump
+		OnJumpRequest.Broadcast();
+	}
+	else if (event.StartsWith(TEXT("Sky"))) {
+		OnSkywalkRequest.Broadcast();
+	}
+	else if (event.StartsWith(TEXT("CryP"))) {
+		OnCrystallizationPressedRequest.Broadcast();
+	}
+	else if (event.StartsWith(TEXT("CryR"))) {
+		OnCrystallizationReleasedRequest.Broadcast();
+	}
+	else if (event.StartsWith(TEXT("Sli"))) {
+		OnSlideRequest.Broadcast();
+	}
+	else if (event.StartsWith(TEXT("Pin"))) {
+		OnPingRequest.Broadcast();
+	}
+	else if (event.StartsWith(TEXT("180"))) {
+		On180Request.Broadcast();
+	}
+	else if (event.StartsWith(TEXT("Pos"))) {
+		FString inputValue;
+		event.Split("[", new FString(), &inputValue);
+		inputValue.Split("]", &inputValue, new FString());
+		FVector position;
+		position.InitFromString(inputValue);
+		playerCharacter->SetActorLocation(position, false, nullptr, ETeleportType::TeleportPhysics);
+	}
+	else if (event.StartsWith(TEXT("Yaw"))) {
+		FString inputValue;
+		event.Split("[", new FString(), &inputValue);
+		inputValue.Split("]", &inputValue, new FString());
+		playerController->SetControlRotation(FRotator(playerController->GetControlRotation().Pitch, FCString::Atof(*inputValue), 0));
+	}
+	else if (event.StartsWith(TEXT("Pitch"))) {
+		FString inputValue;
+		event.Split("[", new FString(), &inputValue);
+		inputValue.Split("]", &inputValue, new FString());
+		playerController->SetControlRotation(FRotator(FCString::Atof(*inputValue), playerController->GetControlRotation().Yaw,  0));
 	}
 }
 
 void URecorderComponent::CheckProgress()
 {
-	float recordedTime;
-	FString timeAsString;
-	FString events;
-	ContentToPlay[ContentCurrentIndex].Split(":", &timeAsString, &events);
-	UE_LOG(LogTemp, Warning, TEXT("recorded time : %s"), *timeAsString);
-	
-	recordedTime = FCString::Atof(*timeAsString);
-	if (recordedTime < frameTime) {
-		PlayEvents(events);
-		ContentCurrentIndex++;
-		CheckProgress();
+	if (ContentCurrentIndex < ContentToPlay.Num()) {
+		float recordedTime;
+		FString timeAsString;
+		FString events;
+		ContentToPlay[ContentCurrentIndex].Split(":", &timeAsString, &events);
+
+		recordedTime = FCString::Atof(*timeAsString);
+		if (recordedTime < frameTime) {
+			PlayEvents(events);
+			ContentCurrentIndex++;
+			CheckProgress();
+		}
 	}
+	else {
+		//stop playback
+		bPlayingBack = false;
+	}
+	
+}
+
+float URecorderComponent::GetCurrentRecordDuration()
+{
+	FString lastLine = ContentToPlay[ContentToPlay.Num() - 1];
+	FString lastTime;
+	lastLine.Split(":", &lastTime, nullptr);
+
+	return FCString::Atof(*lastTime);
+}
+
+
+/**
+ * Gets the value specified by the tag as a string. The correct syntax should be Tag[...]. Prefer the array version.
+ *
+ * @param events			The line where to look for
+ * @param Tag				The tag to look for
+ * @return					Returns the value found as string. If the tag is not found, returns an empty string
+ **/
+FString URecorderComponent::GetStringByTag(FString events, FString Tag)
+{
+	TArray<FString> eventsArray;
+	events.ParseIntoArray(eventsArray, TEXT(";"));
+
+	return GetStringByTag(eventsArray,Tag);
+}
+
+/**
+ * Gets the value specified by the tag as a string. The correct syntax should be Tag[...]. 
+ *
+ * @param events			The line where to look for
+ * @param Tag				The tag to look for
+ * @return					Returns the value found as string. If the tag is not found, returns an empty string
+ **/
+FString URecorderComponent::GetStringByTag(TArray<FString> eventsArray, FString Tag)
+{
+	bool eventFound = false;
+	FString eventToFind;
+
+	for (int i = 0, l = eventsArray.Num(); i < l; i++) {
+		FString currentEvent = eventsArray[i];
+		UE_LOG(LogTemp, Warning, TEXT("current event : %s"), *currentEvent);
+		if (currentEvent.Contains(Tag + "[")) {
+			eventFound = true;
+			eventToFind = currentEvent;
+			break;
+		}
+		else {
+			continue;
+		}
+	}
+	FString value;
+	if (eventFound) {
+		eventToFind.Split(Tag + "[", nullptr, &eventToFind);
+
+		eventToFind.Split("]", &value, nullptr);
+	}
+	
+	return value;
+}
+
+/**
+ * Gets the value specified by the tag as a vector. The correct syntax should be Tag[...]. Prefer the array version.
+ *
+ * @param events			The line where to look for
+ * @param Tag				The tag to look for
+ * @return					Returns the value found as vector. If the tag is not found, returns an zero vector.
+ **/
+FVector URecorderComponent::GetVectorByTag(FString events, FString Tag)
+{
+	FString value = GetStringByTag(events, Tag);
+	FVector result;
+	result.InitFromString(value);
+	return result;
+}
+
+/**
+ * Gets the value specified by the tag as a vector. The correct syntax should be Tag[...].
+ *
+ * @param events			The line where to look for
+ * @param Tag				The tag to look for
+ * @return					Returns the value found as vector. If the tag is not found, returns a zero vector.
+ **/
+FVector URecorderComponent::GetVectorByTag(TArray<FString> eventsArray, FString Tag)
+{
+	FString value = GetStringByTag(eventsArray, Tag);
+	UE_LOG(LogTemp, Warning, TEXT("result as string : %s"), *value);
+	FVector result;
+	result.InitFromString(value);
+	return result;
+}
+
+/**
+ * Gets the value specified by the tag as a float. The correct syntax should be Tag[...]. Prefer the array version.
+ *
+ * @param events			The line where to look for
+ * @param Tag				The tag to look for
+ * @return					Returns the value found as float. If the tag is not found, returns zero.
+ **/
+float URecorderComponent::GetFloatByTag(FString events, FString Tag)
+{
+	FString value = GetStringByTag(events, Tag);
+	float result = FCString::Atof(*value);
+	return result;
+}
+
+/**
+ * Gets the value specified by the tag as a float. The correct syntax should be Tag[...].
+ *
+ * @param events			The line where to look for
+ * @param Tag				The tag to look for
+ * @return					Returns the value found as float. If the tag is not found, returns zero.
+ **/
+float URecorderComponent::GetFloatByTag(TArray<FString> eventsArray, FString Tag)
+{
+	FString value = GetStringByTag(eventsArray, Tag);
+	float result = FCString::Atof(*value);
+	return result;
 }
 
 
@@ -301,7 +488,8 @@ void URecorderComponent::ResumeRecording()
 void URecorderComponent::WriteToFile()
 {
 	FString fileFullPath = FPaths::ProjectDir() + "/Records/" + SaveFileName;
-	FramesEvents.Add("Pos[" + UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation().ToCompactString() + "];");
+
+	FramesEvents.Add(FString::SanitizeFloat(frameTime)+":Pos[" + playerCharacter->GetActorLocation().ToCompactString() + "];Yaw["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];Pitch["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];");
 	FFileHelper::SaveStringArrayToFile(FramesEvents, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 	FramesEvents.Empty();
 
