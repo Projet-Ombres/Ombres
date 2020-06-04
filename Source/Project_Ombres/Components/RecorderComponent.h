@@ -109,7 +109,7 @@ public:
 		bool bPlayingBack;
 
 	UFUNCTION(BlueprintCallable)
-		void StartNewRecording(int checkpointId);
+		void StartNewRecording(int checkpointId,FString Level);
 
 	UFUNCTION(BlueprintCallable)
 		void PlayBack(TArray<FString> RecordContent);

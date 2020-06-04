@@ -191,14 +191,14 @@ void URecorderComponent::GetRidOfOldFiles()
 	
 }
 
-void URecorderComponent::StartNewRecording(int checkpointId)
+void URecorderComponent::StartNewRecording(int checkpointId,FString Level)
 {
 	if (!bPlayingBack) {
 		UE_LOG(LogTemp, Warning, TEXT("STARTED NEW RECORDING"));
 		GetRidOfOldFiles();
 		SaveFileName = FPaths::MakeValidFileName(FDateTime::Now().ToString()) + ".txt";
 		FString fileFullPath = FPaths::ProjectDir() + "/Records/" + SaveFileName;
-		FFileHelper::SaveStringToFile("Lvl[" + GetWorld()->GetName() + "](" + FString::FromInt(checkpointId) + ");Pos[" +playerCharacter->GetActorLocation().ToCompactString() + "];RotY["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];RotP["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];Vel["+playerCharacter->GetVelocity().ToCompactString()+"];" +LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+		FFileHelper::SaveStringToFile("Lvl[" + Level + "](" + FString::FromInt(checkpointId) + ");Pos[" +playerCharacter->GetActorLocation().ToCompactString() + "];RotY["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];RotP["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];Vel["+playerCharacter->GetVelocity().ToCompactString()+"];" +LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 		recordingPaused = true;
 		ResumeRecording();
 	}
@@ -304,13 +304,13 @@ void URecorderComponent::PlayEvent(FString event) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
-		playerController->SetControlRotation(FRotator(playerController->GetControlRotation().Pitch, FCString::Atof(*inputValue), 0));
+		playerController->SetControlRotation(FRotator(playerController->GetControlRotation().Pitch, FCString::Atof(*inputValue), playerController->GetControlRotation().Roll));
 	}
 	else if (event.StartsWith(TEXT("Pitch"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
-		playerController->SetControlRotation(FRotator(FCString::Atof(*inputValue), playerController->GetControlRotation().Yaw,  0));
+		playerController->SetControlRotation(FRotator(FCString::Atof(*inputValue), playerController->GetControlRotation().Yaw, playerController->GetControlRotation().Roll));
 	}
 }
 
