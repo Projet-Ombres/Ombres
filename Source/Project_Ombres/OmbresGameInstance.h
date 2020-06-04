@@ -41,11 +41,17 @@ protected:
 
 	virtual void Init() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	virtual void BeginLoadingScreen(const FString& MapName);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+
+	UFUNCTION(BlueprintCallable)
+		void DisplayLoadingScreen();
+
+	UFUNCTION(BlueprintCallable)
+		void HideLoadingScreen();
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FName> StreamLevelsToLoad;
