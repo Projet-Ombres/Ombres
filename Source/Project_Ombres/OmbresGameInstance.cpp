@@ -87,34 +87,13 @@ public:
 
 protected:
 	FText GetProgressText() const {
-		float percent = 0;
-		FString s = "";
-		if (GetMoviePlayer()->IsLoadingFinished()) {
-			percent = GetProgressPercent();
-			s = TEXT("Loading streaming levels... ");
-			s.Append(FString::SanitizeFloat(percent, 1));
-			s.Append("%");
-		}
-		else {
-			s = TEXT("Loading... ");
-		}
+		FString s = TEXT("Loading... ");
+
 		
 		return FText::FromString(s);
 	}
 
-	float GetProgressPercent() const{
-		TArray<ULevelStreaming*> streamingLevels = UOmbresGameInstance::Instance->GetWorld()->GetStreamingLevels();
-		float percent;
-		int streamingLevelsLoaded = 0;
-		int streamingLevelsCount = streamingLevels.Num();
-		for (int i = 0; i < streamingLevelsCount; i++) {
-			if (streamingLevels[i]->IsLevelLoaded()) {
-				streamingLevelsLoaded++;
-			}
-		}
-		percent=(float)streamingLevelsLoaded / (float)streamingLevelsCount * 100;
-		return percent;
-	}
+	
 
 	FText GetRandomPhrase() const {
 		return UOmbresGameInstance::Instance->LoadingScreenPhrases[UOmbresGameInstance::Instance->randomPhraseIndex];
@@ -137,6 +116,21 @@ private:
 
 	
 };
+
+float UOmbresGameInstance::GetProgressPercent() const {
+
+	float percent;
+	
+	int streamingLevelsLoaded = 0;
+	int streamingLevelsCount = StreamLevelsToLoad.Num();
+	for (int i = 0; i < streamingLevelsCount; i++) {
+		if (UGameplayStatics::GetStreamingLevel(GetWorld(), StreamLevelsToLoad[i])->HasLoadedLevel()) {
+			streamingLevelsLoaded++;
+		}
+	}
+	percent = (float)streamingLevelsLoaded / (float)streamingLevelsCount;
+	return percent;
+}
 
 
 
@@ -223,14 +217,17 @@ void UOmbresGameInstance::EndLoadingScreen(UWorld* InLoadedWorld)
 		UGameplayStatics::LoadStreamLevel(GetWorld(), StreamLevelsToLoad[i], true, true, actionInfo);
 	}
 	OnBaseLevelLoaded.Broadcast();
-	GetWorld()->GetTimerManager().SetTimer(timerHandle,this, &UOmbresGameInstance::CheckIsLoadingSubLevels,1,true,1);
+
+	HideLoadingScreen();
+
 }
 
 void UOmbresGameInstance::DisplayLoadingScreen()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Display loading screen"));
 	FLoadingScreenAttributes LoadingScreen;
-	LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
-	LoadingScreen.bMoviesAreSkippable = true;
+	LoadingScreen.bAutoCompleteWhenLoadingCompletes = true;
+	LoadingScreen.bMoviesAreSkippable = false;
 	LoadingScreen.WidgetLoadingScreen = NewLoadingScreenWidget();
 	LoadingScreen.bWaitForManualStop = false;
 	GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
@@ -238,30 +235,9 @@ void UOmbresGameInstance::DisplayLoadingScreen()
 
 void UOmbresGameInstance::HideLoadingScreen()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Hide loading screen"));
 	GetMoviePlayer()->PassLoadingScreenWindowBackToGame();
 }
-
-
-void UOmbresGameInstance::CheckIsLoadingSubLevels() {
-	TArray<ULevelStreaming*> streamingLevels= GetWorld()->GetStreamingLevels();
-	bool ready = true;
-	for (int i = 0, l = streamingLevels.Num(); i < l; i++) {
-		if (streamingLevels[i]->HasLoadRequestPending() || streamingLevels[i]->IsStreamingStatePending()) {
-			ready = false;
-			UE_LOG(LogTemp, Warning, TEXT("Level streaming %s loading"), *streamingLevels[i]->GetName());
-			break;
-		}
-	}
-
-	if (ready) {
-		HideLoadingScreen();
-		GetWorld()->GetTimerManager().ClearTimer(timerHandle);
-		OnFullLevelLoaded.Broadcast();
-	}
-}
-
-
-
 
 
 

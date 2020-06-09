@@ -26,6 +26,9 @@ public:
 		UPROPERTY()
 		FName LoadingLevelName;
 		
+		UFUNCTION(BlueprintCallable)
+		float GetProgressPercent() const;
+
 		UOmbresGameInstance(const FObjectInitializer& ObjectInitializer);
 
 		UPROPERTY()
@@ -59,12 +62,8 @@ protected:
 	
 
 private:
-	FTimerHandle timerHandle;
 
 	FTimerHandle randomPhrasesTimerHandle;
-
-	UFUNCTION()
-	void CheckIsLoadingSubLevels();
 
 	UPROPERTY(BlueprintAssignable)
 	FBasicDelegate OnFullLevelLoaded;
@@ -83,3 +82,4 @@ private:
 		void ChangeRandomPhrase();
 	
 };
+
