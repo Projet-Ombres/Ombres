@@ -128,7 +128,12 @@ float UOmbresGameInstance::GetProgressPercent() const {
 			streamingLevelsLoaded++;
 		}
 	}
-	percent = (float)streamingLevelsLoaded / (float)streamingLevelsCount;
+	if (streamingLevelsCount > 0) {
+		percent = (float)streamingLevelsLoaded / (float)streamingLevelsCount;
+	}
+	else {
+		percent = 0;
+	}
 	return percent;
 }
 
@@ -241,3 +246,15 @@ void UOmbresGameInstance::HideLoadingScreen()
 
 
 
+bool UOmbresGameInstance::CheckIsLoadingSublevels()
+{
+	TArray<ULevelStreaming*> StreamingLevels = GetWorld()->GetStreamingLevels();
+	bool stillLoading = false;
+	for (int i = 0, l = StreamingLevels.Num(); i < l; i++) {
+		if (StreamingLevels[i]->HasLoadRequestPending()) {
+			stillLoading = true;
+			break;
+		}
+	}
+	return stillLoading;
+}

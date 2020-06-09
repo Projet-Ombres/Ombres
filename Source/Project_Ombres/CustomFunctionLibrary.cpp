@@ -4,6 +4,7 @@
 #include "CustomFunctionLibrary.h"
 #include "SlateBasics.h"
 
+
 bool UCustomFunctionLibrary::IsGamePadConnected()
 {
 	auto genericApplication = FSlateApplication::Get().GetPlatformApplication();
