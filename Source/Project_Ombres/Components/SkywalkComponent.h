@@ -172,6 +172,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		TArray<UStaticMesh*> TilesMeshes;
 
+	UFUNCTION(BlueprintCallable)
+		void SetPaused(bool paused);
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -214,6 +217,9 @@ private:
 
 	UPROPERTY()
 		int platformsSpawned;
+
+	UPROPERTY()
+	TArray<class ASkywalkPlatform*> SpawnedPlatforms;
 
 	
 };

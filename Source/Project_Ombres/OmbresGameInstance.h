@@ -56,6 +56,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void HideLoadingScreen();
 
+	UFUNCTION(BlueprintCallable)
+	bool CheckIsLoadingSublevels();
+
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FName> StreamLevelsToLoad;
 

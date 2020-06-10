@@ -74,6 +74,31 @@ void ASkywalkPlatform::CalculateCommonPositions()
 	ScrapRightOffset = (CameraManager->GetCameraRotation() + FRotator(0, 90, 0)).Vector() * skywalkComponent->SpaceBetweenScraps;
 }
 
+void ASkywalkPlatform::SetPaused(bool paused)
+{
+	for (int i = 0; i < activeScraps1.Num(); i++) {
+		activeScraps1[i]->CustomTimeDilation = paused ? 0 : 1;
+	}
+	for (int i = 0; i < activeScraps2.Num(); i++) {
+		activeScraps2[i]->CustomTimeDilation = paused ? 0 : 1;
+	}
+	if (paused) {
+		GetWorldTimerManager().PauseTimer(timerHandle);
+		GetWorldTimerManager().PauseTimer(timerHandle2);
+		GetWorldTimerManager().PauseTimer(secondLineTimerHandle);
+		GetWorldTimerManager().PauseTimer(firstLineTimerHandle);
+	}
+	else {
+		GetWorldTimerManager().UnPauseTimer(timerHandle);
+		GetWorldTimerManager().UnPauseTimer(timerHandle2);
+		GetWorldTimerManager().UnPauseTimer(secondLineTimerHandle);
+		GetWorldTimerManager().UnPauseTimer(firstLineTimerHandle);
+	}
+	
+
+	SetActorTickEnabled(!paused);
+}
+
 void ASkywalkPlatform::BeginPlay()
 {
 	Super::BeginPlay();
