@@ -66,6 +66,14 @@ bool USkywalkComponent::GetOnCooldown()
 	return OnCoolDown;
 }
 
+void USkywalkComponent::SetPaused(bool paused)
+{
+	for (int i = 0, l = SpawnedPlatforms.Num(); i < l; i++) {
+		SpawnedPlatforms[i]->SetPaused(paused);
+	}
+	SetComponentTickEnabled(!paused);
+}
+
 void USkywalkComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -114,6 +122,7 @@ void USkywalkComponent::StartSkyWalk()
 	if (SpellEnabled) {
 		if (!OnCoolDown) {
 			platformsSpawned = 0;
+			SpawnedPlatforms.Empty();
 			SortScrapsInWorld();
 			GeneratePropsTypes();
 			CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(),0);
@@ -208,6 +217,7 @@ void USkywalkComponent::UpdateSkywalk()
 		platform->SpawnFirstLine();
 		platform->SetDelay(0.1);	//Spawns second scrap line after a delay
 
+		SpawnedPlatforms.Add(platform);
 		platformsSpawned++;
 	}
 }

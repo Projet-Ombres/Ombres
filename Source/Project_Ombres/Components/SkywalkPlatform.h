@@ -144,6 +144,9 @@ public:
 	UPROPERTY()
 		FVector ScrapRightOffset;
 
+	UFUNCTION()
+		void SetPaused(bool paused);
+
 	
 
 protected:
