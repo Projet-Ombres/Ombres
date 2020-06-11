@@ -47,7 +47,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FPowerStateChanged OnSkywalkEnd;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	UParticleSystem* SkywalkVFX;
 
 	UPROPERTY()
@@ -147,6 +147,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FRotator VFXRotation;
+
+	UPROPERTY(EditAnywhere)
+		FVector VFXRelativeLocation;
+
 
 	UPROPERTY()
 	TArray<int> propsTypes;
