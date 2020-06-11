@@ -42,7 +42,7 @@ USkywalkComponent::USkywalkComponent()
 
 	EnablePreviews = true;
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> VFX(TEXT("ParticleSystem'/Game/Ombres/VFX/Skywalk/ParticleSystems/FX_Skywalk.FX_Skywalk'"));
 	if (VFX.Succeeded()) {
 		SkywalkVFX = VFX.Object;
 	}
@@ -140,7 +140,7 @@ void USkywalkComponent::StartSkyWalk()
 			LastPlatformPosition = Player->GetActorLocation();
 			currentTime = 0;
 
-			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("hand_r"), FVector(-30, 30, 0), VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
+			spawnedVFX = UGameplayStatics::SpawnEmitterAttached(SkywalkVFX, Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass())), FName("RightHand"), VFXRelativeLocation, VFXRotation, VFXScale, EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
 			spawnedVFX->bAutoDestroy = true;
 			SetComponentTickEnabled(true);
 			OnSkywalkStart.Broadcast();
