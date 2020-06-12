@@ -158,7 +158,7 @@ UOmbresGameInstance::UOmbresGameInstance(const FObjectInitializer& ObjectInitial
 	}
 
 	LoadingScreenPhrases.SetNum(11, false);
-	LoadingScreenPhrases[0] = FText::FromString(TEXT("Le diesel est la source d'énergie la plus sûre de Londres !"));
+	LoadingScreenPhrases[0] = FText::FromString(TEXT("Le diesel est la source d'energie la plus sure de Londres !"));
 	LoadingScreenPhrases[1] = FText::FromString(TEXT("Les Gardiens peuvent parfois utiliser plus de 3L de diesel par heure."));
 	LoadingScreenPhrases[2] = FText::FromString(TEXT("Un gardien mécanique peut aller à une vitesse de pointe de 40km / h ! Rien de sert de résister face à eux !"));
 	LoadingScreenPhrases[3] = FText::FromString(TEXT("Le plus grand bâtiment de notre magnifique ville fait 312 mètres et est occupé par 250 personnes."));
@@ -176,6 +176,18 @@ UOmbresGameInstance::UOmbresGameInstance(const FObjectInitializer& ObjectInitial
 FText UOmbresGameInstance::GetCurrentPhrase() const
 {
 	return LoadingScreenPhrases[randomPhraseIndex];
+}
+
+bool UOmbresGameInstance::IsAltTabbed() const
+{
+	
+	ULocalPlayer* localPlayer = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetLocalPlayer();
+	if (localPlayer == nullptr) {
+		UE_LOG(LogTemp, Warning, TEXT("local player null"));
+		return false;
+	}
+
+	return !localPlayer->ViewportClient->Viewport || !localPlayer->ViewportClient->Viewport->IsForegroundWindow();
 }
 
 void UOmbresGameInstance::Init()
