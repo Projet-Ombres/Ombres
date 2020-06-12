@@ -39,6 +39,9 @@ public:
 		UFUNCTION()
 		FText GetCurrentPhrase() const;
 
+		UFUNCTION(BlueprintCallable)
+			bool IsAltTabbed() const;
+
 
 protected:
 
