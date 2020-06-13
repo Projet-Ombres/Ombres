@@ -60,14 +60,14 @@ void URecorderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 void URecorderComponent::RecordMovementInputForward(float value)
 {
 	if (bRecording) {
-		FrameEvents += "MovF[" + FString::SanitizeFloat(value) + "];";
+		FrameEvents += "MoF[" + FString::SanitizeFloat(value) + "];";
 	}
 }
 
 void URecorderComponent::RecordMovementInputRight(float value)
 {
 	if (bRecording) {
-		FrameEvents += "MovR[" + FString::SanitizeFloat(value) + "];";
+		FrameEvents += "MoR[" + FString::SanitizeFloat(value) + "];";
 	}
 }
 
@@ -75,14 +75,14 @@ void URecorderComponent::RecordMovementInputRight(float value)
 void URecorderComponent::RecordControlRotationYaw(float YawValue)
 {
 	if (bRecording) {
-		FrameEvents += "RotY[" + FString::SanitizeFloat(YawValue) + "];";
+		FrameEvents += "RoY[" + FString::SanitizeFloat(YawValue) + "];";
 	}
 }
 
 void URecorderComponent::RecordControlRotationPitch(float PitchValue)
 {
 	if (bRecording) {
-		FrameEvents += "RotP[" + FString::SanitizeFloat(PitchValue) + "];";
+		FrameEvents += "RoP[" + FString::SanitizeFloat(PitchValue) + "];";
 	}
 }
 
@@ -118,13 +118,13 @@ void URecorderComponent::RecordPing()
 void URecorderComponent::RecordCrystallizationPressed()
 {
 	if (bRecording) {
-		FrameEvents += "CryP;";
+		FrameEvents += "CrP;";
 	}
 }
 
 void URecorderComponent::RecordCrystallizationReleased() {
 	if (bRecording) {
-		FrameEvents += "CryR";
+		FrameEvents += "CrR";
 	}
 }
 
@@ -198,7 +198,7 @@ void URecorderComponent::StartNewRecording(int checkpointId,FString Level)
 		GetRidOfOldFiles();
 		SaveFileName = FPaths::MakeValidFileName(FDateTime::Now().ToString()) + ".txt";
 		FString fileFullPath = FPaths::ProjectDir() + "/Records/" + SaveFileName;
-		FFileHelper::SaveStringToFile("Lvl[" + Level + "](" + FString::FromInt(checkpointId) + ");Pos[" +playerCharacter->GetActorLocation().ToCompactString() + "];RotY["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];RotP["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];Vel["+playerCharacter->GetVelocity().ToCompactString()+"];" +LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+		FFileHelper::SaveStringToFile("Lvl[" + Level + "](" + FString::FromInt(checkpointId) + ");Pos[" +playerCharacter->GetActorLocation().ToCompactString() + "];RoY["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];RoP["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];Vel["+playerCharacter->GetVelocity().ToCompactString()+"];" +LINE_TERMINATOR, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 		recordingPaused = true;
 		ResumeRecording();
 	}
@@ -220,8 +220,8 @@ void URecorderComponent::PlayBack(TArray<FString> RecordContent)
 	TArray<FString> firstLineEvents;
 	firstLine.ParseIntoArray(firstLineEvents, TEXT(";"));
 	FVector playerInitialPosition = GetVectorByTag(firstLineEvents, "Pos");
-	float playerInitialYaw = GetFloatByTag(firstLineEvents, "RotY");
-	float playerInitialPitch = GetFloatByTag(firstLineEvents, "RotP");
+	float playerInitialYaw = GetFloatByTag(firstLineEvents, "RoY");
+	float playerInitialPitch = GetFloatByTag(firstLineEvents, "RoP");
 	FVector playerInitialVeloctity = GetVectorByTag(firstLineEvents, "Vel");
 
 	bool s = playerCharacter->SetActorLocation(playerInitialPosition);
@@ -243,56 +243,58 @@ void URecorderComponent::PlayEvents(FString events)
 }
 
 void URecorderComponent::PlayEvent(FString event) {
-	if (event.StartsWith(TEXT("MovR"))) {
+	FString firstThreeChars = event.Left(3);
+
+	if (firstThreeChars.Equals(TEXT("MoR"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
 
 		OnMoveRightRequest.Broadcast(FCString::Atof(*inputValue));
 	}
-	else if (event.StartsWith(TEXT("MovF"))) {
+	else if (firstThreeChars.Equals(TEXT("MoF"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
 
 		OnMoveForwardRequest.Broadcast(FCString::Atof(*inputValue));
 	}
-	else if (event.StartsWith(TEXT("RotY"))) {
+	else if (firstThreeChars.Equals(TEXT("RoY"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
 
 		OnRotationYawRequest.Broadcast(FCString::Atof(*inputValue));
 	}
-	else if (event.StartsWith(TEXT("RotP"))) {
+	else if (firstThreeChars.Equals(TEXT("RoP"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
 
 		OnRotationPitchRequest.Broadcast(FCString::Atof(*inputValue));
 	}
-	else if (event.StartsWith(TEXT("Jum"))) {
+	else if (firstThreeChars.Equals(TEXT("Jum"))) {
 		OnJumpRequest.Broadcast();
 	}
-	else if (event.StartsWith(TEXT("Sky"))) {
+	else if (firstThreeChars.Equals(TEXT("Sky"))) {
 		OnSkywalkRequest.Broadcast();
 	}
-	else if (event.StartsWith(TEXT("CryP"))) {
+	else if (firstThreeChars.Equals(TEXT("CrP"))) {
 		OnCrystallizationPressedRequest.Broadcast();
 	}
-	else if (event.StartsWith(TEXT("CryR"))) {
+	else if (firstThreeChars.Equals(TEXT("CrR"))) {
 		OnCrystallizationReleasedRequest.Broadcast();
 	}
-	else if (event.StartsWith(TEXT("Sli"))) {
+	else if (firstThreeChars.Equals(TEXT("Sli"))) {
 		OnSlideRequest.Broadcast();
 	}
-	else if (event.StartsWith(TEXT("Pin"))) {
+	else if (firstThreeChars.Equals(TEXT("Pin"))) {
 		OnPingRequest.Broadcast();
 	}
-	else if (event.StartsWith(TEXT("180"))) {
+	else if (firstThreeChars.Equals(TEXT("180"))) {
 		On180Request.Broadcast();
 	}
-	else if (event.StartsWith(TEXT("Pos"))) {
+	else if (firstThreeChars.Equals(TEXT("Pos"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
@@ -300,13 +302,13 @@ void URecorderComponent::PlayEvent(FString event) {
 		position.InitFromString(inputValue);
 		playerCharacter->SetActorLocation(position, false, nullptr, ETeleportType::TeleportPhysics);
 	}
-	else if (event.StartsWith(TEXT("Yaw"))) {
+	else if (firstThreeChars.Equals(TEXT("Yaw"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
 		playerController->SetControlRotation(FRotator(playerController->GetControlRotation().Pitch, FCString::Atof(*inputValue), playerController->GetControlRotation().Roll));
 	}
-	else if (event.StartsWith(TEXT("Pitch"))) {
+	else if (firstThreeChars.Equals(TEXT("Pit"))) {
 		FString inputValue;
 		event.Split("[", new FString(), &inputValue);
 		inputValue.Split("]", &inputValue, new FString());
@@ -489,7 +491,7 @@ void URecorderComponent::WriteToFile()
 {
 	FString fileFullPath = FPaths::ProjectDir() + "/Records/" + SaveFileName;
 
-	FramesEvents.Add(FString::SanitizeFloat(frameTime)+":Pos[" + playerCharacter->GetActorLocation().ToCompactString() + "];Yaw["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];Pitch["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];");
+	FramesEvents.Add(FString::SanitizeFloat(frameTime)+":Pos[" + playerCharacter->GetActorLocation().ToCompactString() + "];Yaw["+FString::SanitizeFloat(playerController->GetControlRotation().Yaw)+"];Pit["+FString::SanitizeFloat(playerController->GetControlRotation().Pitch)+"];Vel["+playerCharacter->GetVelocity().ToCompactString()+"];");
 	FFileHelper::SaveStringArrayToFile(FramesEvents, *fileFullPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 	FramesEvents.Empty();
 
