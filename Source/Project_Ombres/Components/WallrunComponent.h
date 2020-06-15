@@ -101,6 +101,12 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		FVector wallNormal;
 
+	UPROPERTY(BlueprintReadWrite)
+		bool bAutoWallrun;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool inputPressed;
+
 
 private:
 	bool bWallrunLeft;
@@ -193,9 +199,6 @@ private:
 	UFUNCTION()
 		void UpdateCameraRoll(float Value);
 
-
-	UFUNCTION()
-		void StopCameraRoll();
 
 	UFUNCTION()
 		bool IsAllowedToWallrun();

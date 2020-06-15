@@ -28,6 +28,7 @@ UWallrunComponent::UWallrunComponent()
 	stopWallrunTolerance = 0.2f;
 	CameraRollTransitionDuration = 0.2f;
 	bIsDoingSomethingElse = false;
+	bAutoWallrun = true;
 
 	static ConstructorHelpers::FObjectFinder<UCurveFloat> heightCurve(TEXT("CurveFloat'/Game/BP/Curves/WallRunCurve.WallRunCurve'"));
 	if (heightCurve.Succeeded()) {
@@ -355,13 +356,8 @@ void UWallrunComponent::UpdateCameraRoll(float Value)
 }
 
 
-
-void UWallrunComponent::StopCameraRoll()
-{
-}
-
 bool UWallrunComponent::IsAllowedToWallrun()
 {
-	return !bIsDoingSomethingElse && playerCharacter->GetCharacterMovement()->IsFalling();
+	return (bAutoWallrun?playerCharacter->GetCharacterMovement()->IsFalling():inputPressed && playerCharacter->GetCharacterMovement()) && !bIsDoingSomethingElse;
 }
 
