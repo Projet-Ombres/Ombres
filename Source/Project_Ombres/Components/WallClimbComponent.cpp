@@ -126,11 +126,12 @@ void UWallClimbComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UWallClimbComponent::EscalateWall()
 {
 	HeightToClimb= UKismetMathLibrary::Abs(locationHit.Z - PlayerCharacter->GetActorLocation().Z);
-	UE_LOG(LogTemp, Warning, TEXT("height to climb : %f"), HeightToClimb);
 	wallrunComponent->bIsDoingSomethingElse = true;
 	bWasReset = false;
 	CameraUp(true, 10);
 	OnEscalate.Broadcast();
+	applyingDecayingSpeed = false;
+	DecayingSpeedTimeLeft = 0;
 	
 	LastNormal = WallNormal;
 	PlayerCharacter->GetCharacterMovement()->GravityScale = 1;
@@ -162,8 +163,12 @@ void UWallClimbComponent::EscalateWall()
 
 void UWallClimbComponent::ClimbLedge()
 {
-	UE_LOG(LogTemp, Warning, TEXT("climb start time : %f"), ClimbMontageStartTime);
-	if (!bIsClimbingLedge) {
+	if (applyingDecayingSpeed) {
+		applyingDecayingSpeed = false;
+		DecayingSpeedTimeLeft = 0;
+		return;
+	}
+	if (!bIsClimbingLedge && !applyingDecayingSpeed) {
 		FRotator controlRotation = playerController->GetControlRotation();
 		playerController->SetControlRotation(FRotator(controlRotation.Pitch, (WallNormal * -1).ToOrientationRotator().Yaw, controlRotation.Roll));
 		wallrunComponent->StopWallrun();
@@ -254,6 +259,9 @@ void UWallClimbComponent::RotateCameraYaw()
 
 void UWallClimbComponent::HeightTracer()
 {
+	if (bIsClimbingLedge) {
+		return;
+	}
 	CalculateTracePoints();
 	FVector RightVector = PlayerCharacter->GetActorRightVector() * SideTracersOffset;
 
