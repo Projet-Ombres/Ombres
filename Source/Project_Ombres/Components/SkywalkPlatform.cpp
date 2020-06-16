@@ -77,10 +77,24 @@ void ASkywalkPlatform::CalculateCommonPositions()
 void ASkywalkPlatform::SetPaused(bool paused)
 {
 	for (int i = 0; i < activeScraps1.Num(); i++) {
-		activeScraps1[i]->CustomTimeDilation = paused ? 0 : 1;
+		if (IsValid(activeScraps1[i])) {
+			activeScraps1[i]->CustomTimeDilation = paused ? 0 : 1;
+		}
+		else {
+			activeScraps1.RemoveAt(i);
+			i--;
+			continue;
+		}
 	}
 	for (int i = 0; i < activeScraps2.Num(); i++) {
-		activeScraps2[i]->CustomTimeDilation = paused ? 0 : 1;
+		if (IsValid(activeScraps2[i])) {
+			activeScraps2[i]->CustomTimeDilation = paused ? 0 : 1;
+		}
+		else {
+			activeScraps2.RemoveAt(i);
+			i--;
+			continue;
+		}
 	}
 	if (paused) {
 		GetWorldTimerManager().PauseTimer(timerHandle);
