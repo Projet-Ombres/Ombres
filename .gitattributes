@@ -7,3 +7,4 @@ BEAT.uasset filter=lfs diff=lfs merge=lfs -text
 NAPPE.uasset filter=lfs diff=lfs merge=lfs -text
 HARMONIE.uasset filter=lfs diff=lfs merge=lfs -text
 ELECTRO.uasset filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
