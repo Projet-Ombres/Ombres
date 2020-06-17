@@ -147,6 +147,8 @@ public:
 	UFUNCTION()
 		void SetPaused(bool paused);
 
+	UFUNCTION()
+		void DestroyActor();
 	
 
 protected:
@@ -169,8 +171,7 @@ private:
 	FTimerHandle firstLineTimerHandle;
 	FTimerHandle secondLineTimerHandle;
 
-	UFUNCTION()
-	void DestroyActor();
+	
 
 	
 

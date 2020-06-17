@@ -76,6 +76,15 @@ void USkywalkComponent::SetPaused(bool paused)
 	SetComponentTickEnabled(!paused);
 }
 
+void USkywalkComponent::DestroyProps()
+{
+	for (int i = 0, l = SpawnedPlatforms.Num(); i < l; i++) {
+		if (IsValid(SpawnedPlatforms[i])) {
+			SpawnedPlatforms[i]->DestroyActor();
+		}
+	}
+}
+
 void USkywalkComponent::BeginPlay()
 {
 	Super::BeginPlay();
