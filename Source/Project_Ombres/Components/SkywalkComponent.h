@@ -179,6 +179,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetPaused(bool paused);
 
+	UFUNCTION(BlueprintCallable)
+		void DestroyProps();
+
 
 protected:
 	virtual void BeginPlay() override;
