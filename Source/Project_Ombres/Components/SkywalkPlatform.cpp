@@ -278,15 +278,12 @@ void ASkywalkPlatform::Tick(float DeltaTime) {
 void ASkywalkPlatform::ResetPhysics1()
 {
 	for (int i = 0, l = levitatingScraps1.Num(); i < l; i++) {
-		if (IsValid(levitatingScraps1[i])) {
-			UStaticMeshComponent* smc = Cast<UStaticMeshComponent>(levitatingScraps1[i]->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-			smc->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-			smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
-			smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
-			smc->SetSimulatePhysics(true);
-			smc->SetEnableGravity(true);
-		}
-		
+		UStaticMeshComponent* smc = Cast<UStaticMeshComponent>(levitatingScraps1[i]->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+		smc->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+		smc->SetSimulatePhysics(true);
+		smc->SetEnableGravity(true);
 	}
 	
 
@@ -296,14 +293,12 @@ void ASkywalkPlatform::ResetPhysics1()
 void ASkywalkPlatform::ResetPhysics2()
 {
 	for (int i = 0, l = levitatingScraps2.Num(); i < l; i++) {
-		if (IsValid(levitatingScraps2[i])) {
-			UStaticMeshComponent* smc = Cast<UStaticMeshComponent>(levitatingScraps2[i]->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-			smc->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-			smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
-			smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
-			smc->SetSimulatePhysics(true);
-			smc->SetEnableGravity(true);
-		}
+		UStaticMeshComponent* smc = Cast<UStaticMeshComponent>(levitatingScraps2[i]->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+		smc->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel18, ECollisionResponse::ECR_Ignore);
+		smc->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+		smc->SetSimulatePhysics(true);
+		smc->SetEnableGravity(true);
 	}
 	
 }
@@ -364,11 +359,6 @@ void ASkywalkPlatform::Init() {
 
 void ASkywalkPlatform::DestroyActor()
 {
-	levitatingScraps1.Append(activeScraps1);
-	levitatingScraps2.Append(activeScraps2);
-	ResetPhysics1();
-	ResetPhysics2();
-	GetWorldTimerManager().ClearTimer(timerHandle);
 	Destroy();
 }
 
