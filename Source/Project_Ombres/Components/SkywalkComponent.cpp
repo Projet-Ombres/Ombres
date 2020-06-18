@@ -69,9 +69,20 @@ bool USkywalkComponent::GetOnCooldown()
 void USkywalkComponent::SetPaused(bool paused)
 {
 	for (int i = 0, l = SpawnedPlatforms.Num(); i < l; i++) {
-		SpawnedPlatforms[i]->SetPaused(paused);
+		if (IsValid(SpawnedPlatforms[i])) {
+			SpawnedPlatforms[i]->SetPaused(paused);
+		}
 	}
 	SetComponentTickEnabled(!paused);
+}
+
+void USkywalkComponent::DestroyProps()
+{
+	for (int i = 0, l = SpawnedPlatforms.Num(); i < l; i++) {
+		if (IsValid(SpawnedPlatforms[i])) {
+			SpawnedPlatforms[i]->DestroyActor();
+		}
+	}
 }
 
 void USkywalkComponent::BeginPlay()
