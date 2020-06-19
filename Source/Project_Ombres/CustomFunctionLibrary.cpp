@@ -5,6 +5,24 @@
 #include "SlateBasics.h"
 
 
+
+
+void UCustomFunctionLibrary::SetCollisionResponseToChannels(UPrimitiveComponent* Component, FCollisionResponseContainer collision) {
+	Component->SetCollisionResponseToChannels(collision);
+}
+
+
+
+bool UCustomFunctionLibrary::CollisionEquals(FCollisionResponseContainer collision1, FCollisionResponseContainer collision2) {
+	return collision1 == collision2;
+}
+
+FCollisionResponseContainer UCustomFunctionLibrary::GetCollisionResponseToChannels(UPrimitiveComponent* Component){
+	return Component->GetCollisionResponseToChannels();
+}
+
+
+
 bool UCustomFunctionLibrary::IsGamePadConnected()
 {
 	auto genericApplication = FSlateApplication::Get().GetPlatformApplication();
