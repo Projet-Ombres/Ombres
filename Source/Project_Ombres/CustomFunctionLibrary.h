@@ -47,16 +47,6 @@ class PROJECT_OMBRES_API UCustomFunctionLibrary : public UBlueprintFunctionLibra
 	
 public:
 
-	UFUNCTION(BlueprintCallable)
-		static void SetCollisionResponseToChannels(UPrimitiveComponent* Component, FCollisionResponseContainer collision);
-
-	UFUNCTION(BlueprintCallable)
-		static bool CollisionEquals(FCollisionResponseContainer collision1, FCollisionResponseContainer collision2);
-
-
-	UFUNCTION(BlueprintCallable)
-		static FCollisionResponseContainer GetCollisionResponseToChannels(UPrimitiveComponent* Component);
-
 
 	UFUNCTION(BlueprintCallable)
 		static TArray<FString> GetRecordContent(FString FileName);
