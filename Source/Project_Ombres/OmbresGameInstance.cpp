@@ -263,7 +263,7 @@ bool UOmbresGameInstance::CheckIsLoadingSublevels()
 	TArray<ULevelStreaming*> StreamingLevels = GetWorld()->GetStreamingLevels();
 	bool stillLoading = false;
 	for (int i = 0, l = StreamingLevels.Num(); i < l; i++) {
-		if (StreamingLevels[i]->ShouldBeLoaded()  && (!StreamingLevels[i]->HasLoadedLevel() || StreamingLevels[i]->HasLoadRequestPending())) {
+		if (StreamingLevels[i]->HasLoadRequestPending()) {
 			stillLoading = true;
 			break;
 		}
