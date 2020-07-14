@@ -369,6 +369,8 @@ void ASkywalkPlatform::DestroyActor()
 	ResetPhysics1();
 	ResetPhysics2();
 	GetWorldTimerManager().ClearTimer(timerHandle);
+	GetWorldTimerManager().ClearTimer(firstLineTimerHandle);
+	GetWorldTimerManager().ClearTimer(secondLineTimerHandle);
 	Destroy();
 }
 
