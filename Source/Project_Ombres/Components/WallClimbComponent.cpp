@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
 #include "ConstructorHelpers.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 UWallClimbComponent::UWallClimbComponent()
@@ -200,6 +201,7 @@ void UWallClimbComponent::StopCancellingClimb()
 void UWallClimbComponent::StopClimbing()
 {
 	bIsClimbingLedge = false;
+	bIsEscalating = false;
 	PlayerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	wallrunComponent->bIsDoingSomethingElse = false;
 	applyingDecayingSpeed = true;
@@ -283,6 +285,9 @@ void UWallClimbComponent::HeightTracer()
 		HitActor = hitResult.GetActor();
 		locationHit = hitResult.Location;
 	}
+	else {
+		canGrabRight = false;
+	}
 
 	
 	//left hand tracer
@@ -296,18 +301,33 @@ void UWallClimbComponent::HeightTracer()
 		canGrabLeft = LeftHandNormal.Z > 0.8f;
 		HitActor = hitResult.GetActor();
 		locationHit = hitResult.Location;
+	}else{
+		canGrabLeft = false;
 	}
 
-	if (bInFrontOfWall = leftHandTracerTriggered || rightHandTracerTriggered) {
+	start = PlayerCharacter->GetActorLocation();
+	end = start + PlayerCharacter->GetActorForwardVector()*75;
+
+	bInFrontOfWall = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel2);
+	bInFrontOfWall = bInFrontOfWall && hitResult.Actor == HitActor;
+
+	FVector frontNormal = hitResult.ImpactNormal;
+
+	float pelvisHeight = PlayerCharacter->GetActorLocation().Z;
+	bool canGrab = (canGrabLeft && LeftHandSpotToGrab.Z - pelvisHeight < 30) || ( canGrabRight && RightHandSpotToGrab.Z - pelvisHeight < 30);
+
+	if (bInFrontOfWall) {
 		//calculate normals and hands positions
-		WallNormal = CalculateWallNormal();
+		WallNormal = frontNormal;
 		FVector wallTangeant = WallNormal.RotateAngleAxis(-90, FVector(0, 0, 1)) * SideTracersOffset;
 		WallTopLocation = canGrabLeft ? (LeftHandSpotToGrab + wallTangeant) : (RightHandSpotToGrab - wallTangeant);
 		WallLocation = FVector(WallTopLocation.X, WallTopLocation.Y, PlayerCharacter->GetActorLocation().Z);
 		WallLocation += WallNormal * 40;
 
-		float pelvisHeight = PlayerCharacter->GetMesh()->GetSocketLocation(FName("pelvisSocket")).Z;
-		bool canGrab = UKismetMathLibrary::InRange_FloatFloat(pelvisHeight - LeftHandSpotToGrab.Z, -65, 100) || UKismetMathLibrary::InRange_FloatFloat(pelvisHeight - RightHandSpotToGrab.Z, -65, 100);
+
+		
+
+		//UE_LOG(LogTemp, Warning, TEXT("left hand position : %s"), *LeftHandSpotToGrab.ToString());
 
 		if (canGrab) {
 			//climb ledge
@@ -326,10 +346,10 @@ void UWallClimbComponent::HeightTracer()
 		}
 		else {
 			//escalate
-			if (!bIsClimbingLedge && !bIsEscalating && PlayerCharacter->GetCharacterMovement()->IsFalling() && !bIsPropulsed && bInFrontOfWall) {
+			if (!bIsClimbingLedge && !bIsEscalating && PlayerCharacter->GetCharacterMovement()->IsFalling() && !bIsPropulsed && PlayerCharacter->GetVelocity().Z>-200) {
 				LastWallJumped = HitActor;
 
-				if (LeftHandNormal.Z >= -0.1f || RightHandNormal.Z >= -0.1f) {
+				if ((WallNormal.Z >= -0.1f && WallNormal.Z<0.1f)) {
 					EscalateWall();
 				}
 
@@ -337,9 +357,17 @@ void UWallClimbComponent::HeightTracer()
 		}
 	}
 	else {
-		if (bIsEscalating) {
+		if (canGrab) {
+			WallNormal = CalculateWallNormal();
+			CalculateHandRotations();
+			CorrectHandPositions(LeftHandRotY, RightHandRotY);
+
 			ClimbMontageStartTime = UKismetMathLibrary::FClamp(HeightToClimb < 200 ? (1 - HeightToClimb / 200) : 0, 0, 0.75f);
 			ClimbLedge();
+		}
+		else {
+			if (bIsEscalating)
+				StopClimbing();
 		}
 	}
 }
@@ -368,6 +396,12 @@ void UWallClimbComponent::CorrectHandPositions(float LeftHandYRotation, float Ri
 			LeftHandSpotToGrab = RightHandSpotToGrab + PlayerCharacter->GetActorRightVector() * -OneHandCorrectionOffset;
 		}
 	}
+
+	LeftHandSpotToGrab -= PlayerCharacter->GetActorForwardVector() * 20;
+	RightHandSpotToGrab -= PlayerCharacter->GetActorForwardVector() * 20;
+	LeftHandSpotToGrab += FVector(0, 0, -10);
+	RightHandSpotToGrab += FVector(0, 0, -10);
+
 
 }
 

@@ -131,7 +131,7 @@ void USkywalkComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 void USkywalkComponent::StartSkyWalk()
 {
 	if (SpellEnabled) {
-		if (!OnCoolDown) {
+		if (!OnCoolDown && !Active) {
 			platformsSpawned = 0;
 			SpawnedPlatforms.Empty();
 			SortScrapsInWorld();
