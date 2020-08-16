@@ -3,7 +3,25 @@
 
 #include "CustomFunctionLibrary.h"
 #include "SlateBasics.h"
+#include "Steamworks/Steamv142/sdk/public/steam/steam_api.h"
+#include "Steamworks/Steamv142/sdk/public/steam/isteamuserstats.h"
+#include "Steamworks/Steamv142/sdk/public/steam/isteamgameserverstats.h"
 
+
+void UCustomFunctionLibrary::ResetSteamAchievement(FString achievementID) {
+	// Initialiser Steam
+	bool bRet = SteamAPI_Init();
+	// Créer l'objet SteamAchievements si Steam a été initialisé avec succès. 
+	if (bRet)
+	{
+		std::string achievementIDAsStdString(TCHAR_TO_UTF8(*achievementID));
+		ISteamGameServerStats* serverStats = SteamGameServerStats();
+		if (serverStats != NULL) {
+			serverStats->ClearUserAchievement(SteamUser()->GetSteamID(), achievementIDAsStdString.c_str());
+		}
+		
+	}
+}
 
 
 

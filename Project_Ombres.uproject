@@ -19,7 +19,7 @@
 	"Plugins": [
 		{
 			"Name": "HoudiniEngine",
-			"Enabled": true
+			"Enabled": false
 		},
 		{
 			"Name": "VaRestPlugin",
@@ -43,6 +43,10 @@
 				"Linux",
 				"Mac"
 			]
+		},
+		{
+			"Name": "OnlineSubsystemSteam",
+			"Enabled": true
 		}
 	]
 }

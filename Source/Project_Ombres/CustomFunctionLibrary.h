@@ -48,6 +48,10 @@ class PROJECT_OMBRES_API UCustomFunctionLibrary : public UBlueprintFunctionLibra
 public:
 
 	UFUNCTION(BlueprintCallable)
+		static void ResetSteamAchievement(FString achievementID);
+
+
+	UFUNCTION(BlueprintCallable)
 		static void SetCollisionResponseToChannels(UPrimitiveComponent* Component, FCollisionResponseContainer collision);
 
 	UFUNCTION(BlueprintCallable)
