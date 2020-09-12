@@ -11,7 +11,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
 #include "ConstructorHelpers.h"
-#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 UWallClimbComponent::UWallClimbComponent()
@@ -74,7 +73,7 @@ void UWallClimbComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		else {
 			applyingDecayingSpeed = false;
 		}
-		
+
 	}
 
 	if (bRotatingYaw) {
@@ -95,10 +94,10 @@ void UWallClimbComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 		FRotator controlRotation = playerController->GetControlRotation();
 		if (CameraPitchRotationTimeLeft > 0) {
-			float alpha =CameraUpCurve->GetFloatValue(1 - (CameraPitchRotationTimeLeft / CameraPitchRotationDuration));
+			float alpha = CameraUpCurve->GetFloatValue(1 - (CameraPitchRotationTimeLeft / CameraPitchRotationDuration));
 
-			
-		
+
+
 			playerController->SetControlRotation(UKismetMathLibrary::RLerp(FRotator(CameraStartPitch, controlRotation.Yaw, controlRotation.Roll), FRotator(CameraTargetPitch, controlRotation.Yaw, controlRotation.Roll), alpha, true));
 		}
 		else {
@@ -120,20 +119,20 @@ void UWallClimbComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	else {
 		cancelCurrentTime = 0;
 	}
-	
-	
+
+
 }
 
 void UWallClimbComponent::EscalateWall()
 {
-	HeightToClimb= UKismetMathLibrary::Abs(locationHit.Z - PlayerCharacter->GetActorLocation().Z);
+	HeightToClimb = UKismetMathLibrary::Abs(locationHit.Z - PlayerCharacter->GetActorLocation().Z);
 	wallrunComponent->bIsDoingSomethingElse = true;
 	bWasReset = false;
 	CameraUp(true, 10);
 	OnEscalate.Broadcast();
 	applyingDecayingSpeed = false;
 	DecayingSpeedTimeLeft = 0;
-	
+
 	LastNormal = WallNormal;
 	PlayerCharacter->GetCharacterMovement()->GravityScale = 1;
 	PlayerCharacter->bUseControllerRotationYaw = false;
@@ -149,7 +148,7 @@ void UWallClimbComponent::EscalateWall()
 		newPlayerLocation = WallNormal * 75 + PlayerCharacter->GetActorLocation();
 		PlayerCharacter->SetActorLocation(newPlayerLocation);
 	}
-	
+
 	skywalkComponent->EndSkyWalk();
 	if (IsValid(skywalkComponent->LastPlatformSpawned)) {
 		skywalkComponent->LastPlatformSpawned->Destroy();
@@ -159,7 +158,7 @@ void UWallClimbComponent::EscalateWall()
 	RotateCameraYaw();
 	newPlayerLocation = PlayerCharacter->GetActorLocation() - WallNormal * 40;
 	PlayerCharacter->SetActorLocation(newPlayerLocation);
-	
+
 }
 
 void UWallClimbComponent::ClimbLedge()
@@ -180,7 +179,7 @@ void UWallClimbComponent::ClimbLedge()
 		bIsClimbingLedge = true;
 		CameraUp(false, 2);
 		OnLedgeClimb.Broadcast();
-	
+
 	}
 }
 
@@ -201,7 +200,6 @@ void UWallClimbComponent::StopCancellingClimb()
 void UWallClimbComponent::StopClimbing()
 {
 	bIsClimbingLedge = false;
-	bIsEscalating = false;
 	PlayerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	wallrunComponent->bIsDoingSomethingElse = false;
 	applyingDecayingSpeed = true;
@@ -224,7 +222,7 @@ void UWallClimbComponent::DetachFromWall()
 
 void UWallClimbComponent::Drop()
 {
-	
+
 	DetachFromWall();
 	bCancellingClimb = false;
 	bIsPropulsed = true;
@@ -238,10 +236,10 @@ void UWallClimbComponent::CameraUp(bool CameraUp, float ResetTimeDilation)
 	if (CameraUp) {
 		playerController->SetIgnoreLookInput(true);
 		CameraTargetPitch = CameraUpPitch;
-		
+
 	}
 	else {
-		
+
 		CameraTargetPitch = 0;
 
 
@@ -275,10 +273,10 @@ void UWallClimbComponent::HeightTracer()
 
 	FVector start = StartTracePoint + RightVector;
 	FVector end = EndTracePoint + RightVector;
-	rightHandTracerTriggered=GetWorld()->SweepSingleByChannel(hitResult,start, end,FVector::UpVector.ToOrientationQuat(), ECC_GameTraceChannel2, sphereShape);
+	rightHandTracerTriggered = GetWorld()->SweepSingleByChannel(hitResult, start, end, FVector::UpVector.ToOrientationQuat(), ECC_GameTraceChannel2, sphereShape);
 	canGrabRight = hitResult.ImpactNormal.Z > 0.8f;
 
-	if (rightHandTracerTriggered){
+	if (rightHandTracerTriggered) {
 		RightHandSpotToGrab = hitResult.ImpactPoint;
 		RightHandNormal = hitResult.ImpactNormal;
 		canGrabRight = RightHandNormal.Z > 0.8f;
@@ -289,7 +287,7 @@ void UWallClimbComponent::HeightTracer()
 		canGrabRight = false;
 	}
 
-	
+
 	//left hand tracer
 	start = StartTracePoint - RightVector;
 	end = EndTracePoint - RightVector;
@@ -301,55 +299,43 @@ void UWallClimbComponent::HeightTracer()
 		canGrabLeft = LeftHandNormal.Z > 0.8f;
 		HitActor = hitResult.GetActor();
 		locationHit = hitResult.Location;
-	}else{
+	}
+	else {
 		canGrabLeft = false;
 	}
 
-	start = PlayerCharacter->GetActorLocation();
-	end = start + PlayerCharacter->GetActorForwardVector()*75;
-
-	bInFrontOfWall = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_GameTraceChannel2);
-	bInFrontOfWall = bInFrontOfWall && hitResult.Actor == HitActor;
-
-	FVector frontNormal = hitResult.ImpactNormal;
-
-	float pelvisHeight = PlayerCharacter->GetActorLocation().Z;
-	bool canGrab = (canGrabLeft && LeftHandSpotToGrab.Z - pelvisHeight < 30) || ( canGrabRight && RightHandSpotToGrab.Z - pelvisHeight < 30);
-
-	if (bInFrontOfWall) {
+	if (bInFrontOfWall = leftHandTracerTriggered || rightHandTracerTriggered) {
 		//calculate normals and hands positions
-		WallNormal = frontNormal;
+		WallNormal = CalculateWallNormal();
 		FVector wallTangeant = WallNormal.RotateAngleAxis(-90, FVector(0, 0, 1)) * SideTracersOffset;
 		WallTopLocation = canGrabLeft ? (LeftHandSpotToGrab + wallTangeant) : (RightHandSpotToGrab - wallTangeant);
 		WallLocation = FVector(WallTopLocation.X, WallTopLocation.Y, PlayerCharacter->GetActorLocation().Z);
 		WallLocation += WallNormal * 40;
 
-
-		
-
-		//UE_LOG(LogTemp, Warning, TEXT("left hand position : %s"), *LeftHandSpotToGrab.ToString());
+		float pelvisHeight = PlayerCharacter->GetMesh()->GetSocketLocation(FName("pelvisSocket")).Z;
+		bool canGrab = UKismetMathLibrary::InRange_FloatFloat(pelvisHeight - LeftHandSpotToGrab.Z, -65, 100) || UKismetMathLibrary::InRange_FloatFloat(pelvisHeight - RightHandSpotToGrab.Z, -65, 100);
 
 		if (canGrab) {
 			//climb ledge
 			if ((canGrabLeft || canGrabRight) && !bIsClimbingLedge) {
-				
+
 				CalculateHandRotations();
 				CorrectHandPositions(LeftHandRotY, RightHandRotY);
-			
-				
-				
-				ClimbMontageStartTime = UKismetMathLibrary::FClamp(HeightToClimb < 200 ? (1- HeightToClimb/200) : 0,0,0.75f);
-				
+
+
+
+				ClimbMontageStartTime = UKismetMathLibrary::FClamp(HeightToClimb < 200 ? (1 - HeightToClimb / 200) : 0, 0, 0.75f);
+
 				ClimbLedge();
 
 			}
 		}
 		else {
 			//escalate
-			if (!bIsClimbingLedge && !bIsEscalating && PlayerCharacter->GetCharacterMovement()->IsFalling() && !bIsPropulsed && PlayerCharacter->GetVelocity().Z>-200) {
+			if (!bIsClimbingLedge && !bIsEscalating && PlayerCharacter->GetCharacterMovement()->IsFalling() && !bIsPropulsed && bInFrontOfWall) {
 				LastWallJumped = HitActor;
 
-				if ((WallNormal.Z >= -0.1f && WallNormal.Z<0.1f)) {
+				if (LeftHandNormal.Z >= -0.1f || RightHandNormal.Z >= -0.1f) {
 					EscalateWall();
 				}
 
@@ -357,18 +343,22 @@ void UWallClimbComponent::HeightTracer()
 		}
 	}
 	else {
+
+		float pelvisHeight = PlayerCharacter->GetActorLocation().Z;
+		bool canGrab = (canGrabLeft && LeftHandSpotToGrab.Z - pelvisHeight < 30) || (canGrabRight && RightHandSpotToGrab.Z - pelvisHeight < 30);
+
 		if (canGrab) {
 			WallNormal = CalculateWallNormal();
 			CalculateHandRotations();
 			CorrectHandPositions(LeftHandRotY, RightHandRotY);
+		}
 
+		if (bIsEscalating) {
 			ClimbMontageStartTime = UKismetMathLibrary::FClamp(HeightToClimb < 200 ? (1 - HeightToClimb / 200) : 0, 0, 0.75f);
 			ClimbLedge();
 		}
-		else {
-			if (bIsEscalating)
-				StopClimbing();
-		}
+		
+		
 	}
 }
 
@@ -382,7 +372,7 @@ bool UWallClimbComponent::ClampCamera(float Value)
 void UWallClimbComponent::CorrectHandPositions(float LeftHandYRotation, float RightHandYRotation)
 {
 	if (LeftHandYRotation >= 0) {
-		LeftHandSpotToGrab -= FVector(0,0,UKismetMathLibrary::Abs(LeftHandYRotation) * HandPositionCorrectionMultiplier);
+		LeftHandSpotToGrab -= FVector(0, 0, UKismetMathLibrary::Abs(LeftHandYRotation) * HandPositionCorrectionMultiplier);
 	}
 	if (RightHandYRotation >= 0) {
 		RightHandSpotToGrab -= FVector(0, 0, UKismetMathLibrary::Abs(RightHandYRotation) * HandPositionCorrectionMultiplier);
@@ -396,12 +386,6 @@ void UWallClimbComponent::CorrectHandPositions(float LeftHandYRotation, float Ri
 			LeftHandSpotToGrab = RightHandSpotToGrab + PlayerCharacter->GetActorRightVector() * -OneHandCorrectionOffset;
 		}
 	}
-
-	LeftHandSpotToGrab -= PlayerCharacter->GetActorForwardVector() * 20;
-	RightHandSpotToGrab -= PlayerCharacter->GetActorForwardVector() * 20;
-	LeftHandSpotToGrab += FVector(0, 0, -10);
-	RightHandSpotToGrab += FVector(0, 0, -10);
-
 
 }
 
@@ -432,6 +416,6 @@ FVector UWallClimbComponent::CalculateWallNormal()
 	FVector average = (PlayerCharacter->GetActorLocation() - (RightHandSpotToGrab + LeftHandSpotToGrab) / 2).GetUnsafeNormal2D();
 
 	return rightHandTracerTriggered ? (leftHandTracerTriggered ? average : rightNormal) : leftNormal;
-	
+
 }
 
