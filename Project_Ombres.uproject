@@ -19,7 +19,7 @@
 	"Plugins": [
 		{
 			"Name": "HoudiniEngine",
-			"Enabled": false
+			"Enabled": true
 		},
 		{
 			"Name": "VaRestPlugin",
