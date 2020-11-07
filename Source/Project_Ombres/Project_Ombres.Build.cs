@@ -10,5 +10,7 @@ public class Project_Ombres : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "MoviePlayer" ,"OnlineSubsystem","OnlineSubsystemUtils","Steamworks"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore","OnlineSubsystem" });
+
+		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
 	}
 }
