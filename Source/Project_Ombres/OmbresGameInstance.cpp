@@ -87,10 +87,7 @@ public:
 
 protected:
 	FText GetProgressText() const {
-		FString s = TEXT("Loading... ");
-
-		
-		return FText::FromString(s);
+		return UOmbresGameInstance::Instance->LoadingText;
 	}
 
 	
@@ -156,38 +153,38 @@ UOmbresGameInstance::UOmbresGameInstance(const FObjectInitializer& ObjectInitial
 	if (textureFinder3.Succeeded()) {
 		backgroundTextures.Add(textureFinder3.Object);
 	}
-
+	
 	LoadingScreenPhrases.SetNum(28, false);
-	LoadingScreenPhrases[0] = FText::FromString(TEXT("Diesel is the safest energy source in London!"));
-	LoadingScreenPhrases[1] = FText::FromString(TEXT("The wardens can sometimes use more than 3L/h of diesel."));
-	LoadingScreenPhrases[2] = FText::FromString(TEXT("A mecanical warden can reach a top speed of 40km/h. There is no point in resisting them!"));
-	LoadingScreenPhrases[3] = FText::FromString(TEXT("The tallest building in our magnificient city is 312m high and is occupied by 250 people."));
-	LoadingScreenPhrases[4] = FText::FromString(TEXT("London has more than 630km of pipe, delivering diesel or more and less clean air."));
-	LoadingScreenPhrases[5] = FText::FromString(TEXT("The vertical tram station is more than 450m high! Be careful not to drop your ticket!"));
-	LoadingScreenPhrases[6] = FText::FromString(TEXT("A tram ticket is only 6.30£, don't hesitate!"));
-	LoadingScreenPhrases[7] = FText::FromString(TEXT("London alchemists are no longer welcome since one of them destroyed an entire factory!"));
-	LoadingScreenPhrases[8] = FText::FromString(TEXT("Even if our diesel has a delicious green colour, don't drink it."));
-	LoadingScreenPhrases[9] = FText::FromString(TEXT("Damage caused by the wardens are not refunded. Article 35 paragrash 8."));
-	LoadingScreenPhrases[10] = FText::FromString(TEXT("A mecanical warden is faster, more efficient and more energetic than a human policeman."));
-	LoadingScreenPhrases[11] = FText::FromString(TEXT("Many residents go to rooftops to breathe cleaner air as smoke spreads on the sidewalks."));
-	LoadingScreenPhrases[12] = FText::FromString(TEXT("Don't hesitate to report any illegal alchemical behaviour. They are terrorists, and nobody likes terrorists."));
-	LoadingScreenPhrases[13] = FText::FromString(TEXT("The wardens' voices are pre-recorded sounds, based on the voice of the governor \"Stan Jacob\"."));
-	LoadingScreenPhrases[14] = FText::FromString(TEXT("London is the most evolved city in the world, thanks to you workers!"));
-	LoadingScreenPhrases[15] = FText::FromString(TEXT("The tram was invented to go from district to district whithout passing through the congested roads."));
-	LoadingScreenPhrases[16] = FText::FromString(TEXT("Thanks to our factories and the smoke they emit, London no longer has moskito problemes in summer. Another advantage of Diesel!"));
-	LoadingScreenPhrases[17] = FText::FromString(TEXT("Alchemists are beings who have lost their humanity and practice black magic. Yuck!"));
-	LoadingScreenPhrases[18] = FText::FromString(TEXT("Quarentine has been setup in order to purify the city of all traces of alchemy. Please help the government!"));
-	LoadingScreenPhrases[19] = FText::FromString(TEXT("Diesel is the fuel of today and tomorrow!"));
-	LoadingScreenPhrases[20] = FText::FromString(TEXT("The symbol consisting of a diagonal and vertical bar in circle, with a crown on the top is the anti-alchemical symbol of the government!"));
-	LoadingScreenPhrases[21] = FText::FromString(TEXT("All the devices in London use Diesel from Diesel Corp!"));
-	LoadingScreenPhrases[22] = FText::FromString(TEXT("Diesel Corp will hire new workers, right after the quarentine. Be patient!"));
-	LoadingScreenPhrases[23] = FText::FromString(TEXT("Alchemy, compared to diesel, is a hazardous source of energy."));
-	LoadingScreenPhrases[24] = FText::FromString(TEXT("If you hear screams during the quarentine, stay home. It means everything is going well!"));
-	LoadingScreenPhrases[25] = FText::FromString(TEXT("The gears of the city partly mix Diesel in tanks and pipes."));
-	LoadingScreenPhrases[26] = FText::FromString(TEXT("The street lamps on the roofs allow our engineers to work on the pipes, even at night!"));
-	LoadingScreenPhrases[27] = FText::FromString(TEXT("The wardens have picks instead of hands to climb walls. Useful for the bad guys. "));
-
-
+	LoadingScreenPhrases[0] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable","LS_00");
+	LoadingScreenPhrases[1] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_01");
+	LoadingScreenPhrases[2] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_02");
+	LoadingScreenPhrases[3] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_03");
+	LoadingScreenPhrases[4] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_04");
+	LoadingScreenPhrases[5] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_05");
+	LoadingScreenPhrases[6] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_06");
+	LoadingScreenPhrases[7] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_07");
+	LoadingScreenPhrases[8] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_08");
+	LoadingScreenPhrases[9] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_09");
+	LoadingScreenPhrases[10] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_10");
+	LoadingScreenPhrases[11] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_11");
+	LoadingScreenPhrases[12] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_12");
+	LoadingScreenPhrases[13] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_13");
+	LoadingScreenPhrases[14] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_14");
+	LoadingScreenPhrases[15] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_15");
+	LoadingScreenPhrases[16] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_16");
+	LoadingScreenPhrases[17] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_17");
+	LoadingScreenPhrases[18] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_18");
+	LoadingScreenPhrases[19] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_19");
+	LoadingScreenPhrases[20] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_20");
+	LoadingScreenPhrases[21] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_21");
+	LoadingScreenPhrases[22] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_22");
+	LoadingScreenPhrases[23] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_23");
+	LoadingScreenPhrases[24] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_24");
+	LoadingScreenPhrases[25] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_25");
+	LoadingScreenPhrases[26] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_26");
+	LoadingScreenPhrases[27] = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "LS_27");
+	
+	LoadingText = FText::FromStringTable("/Game/BP/Localization/AlchemicalTitlesStringTable.AlchemicalTitlesStringTable", "UI_Loading");
 }
 
 
@@ -259,7 +256,6 @@ void UOmbresGameInstance::EndLoadingScreen(UWorld* InLoadedWorld)
 
 void UOmbresGameInstance::DisplayLoadingScreen()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Display loading screen"));
 	FLoadingScreenAttributes LoadingScreen;
 	LoadingScreen.bAutoCompleteWhenLoadingCompletes = true;
 	LoadingScreen.bMoviesAreSkippable = false;
@@ -270,7 +266,6 @@ void UOmbresGameInstance::DisplayLoadingScreen()
 
 void UOmbresGameInstance::HideLoadingScreen()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Hide loading screen"));
 	GetMoviePlayer()->PassLoadingScreenWindowBackToGame();
 }
 

@@ -1,4 +1,0 @@
- - 202D2117479DD735211825A5532BA165 
-	/Game/Levels/02_WhiteBox/WhiteBow_Fin_Preprod.WhiteBow_Fin_Preprod:PersistentLevel.TextRenderActor9.NewTextRenderComponent.Text - "ThighJump" 
-	/Game/Levels/02_WhiteBox/Room_Test_Metrics.Room_Test_Metrics:PersistentLevel.TextRenderActor9.NewTextRenderComponent.Text - "Climb" 
-

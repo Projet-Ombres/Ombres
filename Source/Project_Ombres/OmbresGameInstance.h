@@ -34,6 +34,9 @@ public:
 		UPROPERTY()
 		TArray<FText> LoadingScreenPhrases;
 
+		UPROPERTY()
+		FText LoadingText;
+
 		int randomPhraseIndex;
 
 		UFUNCTION()
