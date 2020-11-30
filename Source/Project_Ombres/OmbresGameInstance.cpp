@@ -12,6 +12,7 @@
 #include "Widgets/Images/SThrobber.h"
 #include "Engine/World.h"
 
+
 UOmbresGameInstance* UOmbresGameInstance::Instance;
 
 class SLoadingScreenWidget : public SCompoundWidget
@@ -212,6 +213,8 @@ void UOmbresGameInstance::Init()
 	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UOmbresGameInstance::BeginLoadingScreen);
 	
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UOmbresGameInstance::EndLoadingScreen);
+
+	FCoreDelegates::OnControllerConnectionChange.AddUObject(this, &UOmbresGameInstance::OnControllerConnectionChanged);
 }
 
 void UOmbresGameInstance::BeginLoadingScreen(const FString& InMapName)
@@ -237,6 +240,11 @@ TSharedRef<SWidget> UOmbresGameInstance::NewLoadingScreenWidget()
 void UOmbresGameInstance::ChangeRandomPhrase()
 {
 	randomPhraseIndex = FMath::RandRange(0, LoadingScreenPhrases.Num() - 1);
+}
+
+void UOmbresGameInstance::OnControllerConnectionChanged(bool connected, int userId, int controllerId)
+{
+	OnControllerConnectionChange.Broadcast();
 }
 
 

@@ -80,6 +80,9 @@ private:
 	UPROPERTY(BlueprintAssignable)
 	FBasicDelegate OnBaseLevelLoaded;
 
+	UPROPERTY(BlueprintAssignable)
+	FBasicDelegate OnControllerConnectionChange;
+
 	TSharedRef<SWidget> NewLoadingScreenWidget();
 
 	UPROPERTY()
@@ -89,6 +92,9 @@ private:
 
 	UFUNCTION()
 		void ChangeRandomPhrase();
+
+	UFUNCTION()
+		void OnControllerConnectionChanged(bool connected, int userId, int controllerId);
 	
 };
 
